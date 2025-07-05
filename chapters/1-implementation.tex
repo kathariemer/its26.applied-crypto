@@ -108,6 +108,52 @@ Dann berechnen wir die Inversen bzgl. der Moduln $m_i$, z.B. mittels erweitertem
 
 Somit können wir mittels Residuen $a_i = x \mod m_i$ berechnen 
 
-\begin{equation*}
-    x = \left(\sum_i a_i \cdot y_i \cdot M_i \right) \mod m = 2\cdot 1 \cdot 5005 + 5 \cdot 1 \cdot 1365 \mod 15015 = 1820.
-\end{equation*}
+\begin{align*}
+    x &= \left(\sum_i a_i \cdot y_i \cdot M_i \right) \mod m \\
+      &= 2\cdot 1 \cdot 5005 + 5 \cdot 1 \cdot 1365 \mod 15015 \\ 
+      &= 1820.
+\end{align*}
+
+%%% subsection %%%
+\subsection{Arrays in nativer Größe}
+
+Sei $W$ die native Wortgröße eines Prozessors und $x$ eine Zahl, deren Binärdarstellung $n$ bit benötigt. Dafür verwenden wir das Array $A$, das $t = \lceil n/W \rceil$ Integers enthält.
+
+\begin{figure}[h]
+    \includegraphics[width=0.8\textwidth]{figures/fig1-arrays-native-size}
+    \centering
+    \caption{Manuel Koschuch, Efficient Security for Mobile Communications Utilizing Elliptic Curves}
+\end{figure}
+
+\paragraph{Vorteile}
+
+\begin{itemize}
+    \item Die Langzahloperationen können auf Operationen auf nativer Wordgröße heruntergebrochen werden.
+    \item Der zusätzliche Speicherbedarf ist maximal so groß wie ein natives Wort.
+    \item Zugriff ist einfach und schnell.
+    \item Vergleich von Langzahlen ist schnell und einfach.
+    \item Verwendung von Langzahlen ist schnell und einfach.
+\end{itemize}
+
+\paragraph{Nachteile}
+
+Operationen für diese Repräsentation sind nur bedingt parallelisierbar, es braucht hier eine carry-propagation.
+
+%%% subsection %%%
+\subsection{Arrays kleiner als die native Größe}
+
+Sei wieder $W$ die native Wortgröße eines Prozessors und $x$ eine Zahl, deren Binärdarstellung $n$ bit benötigt. Jetzt verwenden wir das Array $A$, das 
+$u = \lceil n/(W-k) \rceil$ Integers enthält, wobei $k$ ein für das entstehende Carry veranschlagter Speicher im Buffer ist.
+
+\paragraph{Vorteile}
+
+Hier haben wir ähnliche Vorteile wie bei Arrays in nativer Größe, zusätzlich haben wir Parallelisierbarkeit, weil zwei Worte addiert werden können, ohne dass carry-propagation 
+notwendig wird.
+
+\paragraph{Nachteile}
+
+\begin{itemize}
+    \item Potentiell höherer Speicherbedarf, da pro Wort $k$ Bit für carry frei bleiben
+    \item Am Ende einer Rechnung muss carry sehr wohl propagiert werden (vgl. carry-save adders)
+    \item Komplexere Behandlung der Elemente bei Rechnungen nötig, Konversion zu Beginn und am Ende einer Berechnung
+\end{itemize}
