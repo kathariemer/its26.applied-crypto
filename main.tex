@@ -1,0 +1,37 @@
+\documentclass{book}
+
+\input{preamble.tex}
+
+\begin{document}
+
+%%% frontmatter %%%
+\frontmatter
+
+\title{Angewandte Kryptographie}
+\author{FH Campus Wien}
+\date{SoSe 2025}
+
+\maketitle
+\tableofcontents
+
+%%% mainmatter %%%
+\mainmatter
+
+\input{chapters/1-implementation}
+\input{chapters/2-symmetric-crypto}
+\input{chapters/3-padding}
+\input{chapters/4-asymmetric-crypto}
+\input{chapters/5-generating-primes}
+\input{chapters/6-hash-functions}
+\input{chapters/7-integer-factorisation}
+\input{chapters/8-signatures}
+
+%%% backmatter %%%
+\backmatter
+
+\bibliographystyle{plain}
+\bibliography{bibliography}
+\printindex
+
+\end{document}
+
