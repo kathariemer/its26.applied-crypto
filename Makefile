@@ -54,11 +54,7 @@ rebuild: clean all
 .PHONY: view
 view: $(PDF)
 	# Linux/WSL
-	xdg-open $(PDF) 2>/dev/null || \
-	# macOS
-	open $(PDF) 2>/dev/null || \
-	# Windows
-	start $(PDF) 2>/dev/null || \
+	evince $(PDF) 2>/dev/null || \
 	echo "Please open $(PDF) manually"
 
 # Continuous compilation (requires inotify-tools on Linux)
