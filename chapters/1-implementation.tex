@@ -424,3 +424,85 @@ wird die NAF de Exponenten berechnet.
     \item Es folgen niemals zwei Elemente ungleich 0 aufeinander 
     \item Sie hat durchschnittlich n/3 Elemente ungleich 0
 \end{itemize}
+
+Die Exponentiation ist ähnlich zu Square-and-Multiply, es wird nur vor der Berechnung die Inverse der Basis berechnet und in den Fällen, wo das Bit -1 ist, mit diesem 
+Inversen statt mit der Basis multipliziert.
+
+\paragraph{Beispiel} 
+
+Wir berechnen die NAF von 12. Wir wissen $12 = b1100$, ihre NAF ist $10-100$, weil $12 = 2^4 - 2^2 = 16 - 4$.
+
+\paragraph{Beispiel}
+
+Wir berechnen die NAF von 7. Wir wissen $7 = 111$, die NAF ist $100-1$, weil $7 = 2^3 - 2^0 = 8 - 1$. Die Rechnung $x^7$ mittels NAF:
+
+\begin{verbatim}
+7 = 100-1 (NAF)
+
+m = 1
+
+# i = 1
+m = m * m = 1
+m = m * x = x
+
+# i = 0
+m = m * m = x^2 
+
+# i = 0
+m = m * m = x^4
+
+# i = -1
+m = m * m = x^8
+m = m * x^{-1} = x^7
+\end{verbatim}
+
+\paragraph{Private Key bei RSA}
+
+Privater Schlüssel d bei RSA üblicherweise signifikant länger als öffentlicher (1.024 Bits vs. 16 Bits). Problem: Entschlüsselung und Signaturgenerierung teuer. \\
+
+Lösung: mittels CRT (Chinesicher Restsatz). Statt nur $d$ zu speichern, werden $p$, $q$, $dP$, $dQ$ und $qInv$ einmalig berechnet und gespeichert. Hierbei ist:
+
+\begin{align*}
+dP &= d \mod (p-1) \\
+dQ &= d \mod (q-1) \\
+qInv &= q^{-1} \mod p
+\end{align*}
+
+Die Entschlüsselung wird nicht als $m = c^d \mod n$ berechnet, sondern 
+
+\begin{align*}
+    m_1 &= c^{dP} \mod p \\
+    m_2 &= c^{dQ} \mod q \\
+    h &= qInv \cdot (m_1 - m_2) \mod p \\
+    m &= m_2 + h\cdot q
+\end{align*}
+
+Dadurch sind die Exponenten statt 1024 nur noch ca 512 Bit lang.
+
+\begin{verbatim}
+    Private-Key: (4096 bit, 2 primes)
+
+    modulus: //n (4.096 Bit)
+    00:[…]:5a:ac:58:ff:66:e7
+
+    publicExponent: //e (17 Bit) 
+    65537 (0x10001)
+    
+    privateExponent: //d (4.096 Bit)
+    00:a0:4d:a3:d7:f5:[…]:36:96:67:e5:c1
+
+    prime1: //p (2.048 Bit)
+    00:ed:22:[…]64:2c:07
+
+    prime2: //q (2.048 Bit)
+    00:d9:3f:[…]41:f6:21
+
+    exponent1: //dP (2.048 Bit)
+    00:cf:f1:[…]7f:be:ef
+
+    exponent2: //dQ (2.048 Bit)
+    58:f6:5d:[…]3d:c8:a1
+
+    coefficient: //qInv (2.048 Bit)
+    00:e4:01:[…]76:dd:61:b8
+\end{verbatim}
