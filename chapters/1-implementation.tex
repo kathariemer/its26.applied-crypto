@@ -157,3 +157,270 @@ notwendig wird.
     \item Am Ende einer Rechnung muss carry sehr wohl propagiert werden (vgl. carry-save adders)
     \item Komplexere Behandlung der Elemente bei Rechnungen nötig, Konversion zu Beginn und am Ende einer Berechnung
 \end{itemize}
+
+%%% subsection %%%
+\subsection*{Exkurs: Basisoperationen}
+
+Seien $b, k \in \mathbb{N}$. Für jedes Stellensystem zur Basis $b$ gilt:
+
+\paragraph{Multiplikation}
+
+Eine Multiplikation mit dem Faktor $b^k$ entspricht einem Linksshift um $k$ Stellen. Beispiel:
+
+\begin{align*}
+    & 145 \cdot 10^2 = 14500 \\
+    & 1101 \cdot 2^3 = 1101000
+\end{align*}
+
+\paragraph{Integer-Division}
+
+Eine Integer-Division durch den Divisor $b^k$ entspricht einem Rechtshift um $k$ Stellen. Beispiel:
+
+\begin{align*}
+    & 7654 / 10^3 = 7 \\
+    & 1110011101 / 2^5 = 11100
+\end{align*}
+
+\paragraph{Niederwertigste Stellen extrahieren}
+
+Eine Modulo Operation mit Modul $b^k$ entspricht dem extrahieren der $k$ niederwertigsten Stellen. Beispiel:
+
+\begin{align*}
+    & 65432 \mod 10^3 = 432 \\
+    & 111000101 \mod 2^4 = 0101
+\end{align*}
+
+\paragraph{Casting out nines}
+
+Eine Modulo Operation mit Modul $b^k - 1$ entspricht dem teiler einer Zahl in $k$-stellige Blöcke, die dann aufsummiert werden. Beispiel:
+
+$$34215 \mod (10^2 - 1) = 34215 \mod 99 = 3 + 42 + 15 = 60$$
+
+%%% subsection %%%
+\subsection{Modulo Reduktion}
+
+Eine Moduloreduktion ist die Berechnung des kleinsten Repräsentanten einer Restklasse. Beispiel: die Zahl $17 \mod 5$ wird zu 2 reduziert.
+
+\paragraph{Kriterien für den Einsatz}
+
+Wie können wir feststellen, wann eine Moduloreduktion überhaupt notwendig ist? Grundsätzlich kann immer mit nichtreduzierten Zwischenergebnissen gerechnet werden. In der 
+Praxis ist es aber sinnvoll, eine Reduktion anzuwenden, wenn das Zwischenergebnis mehr als 1 bit länger als der Modulus ist. Diese Bedingung ist über ein logisches Und 
+vom MSW (most significant word) des Zwischenergebnisses und einer Bitmaske abhängig vom Modul einfach feststellbar.
+
+\paragraph{Kosten von Langzahldivisionen}
+
+Divisionen von Wörtern sind teure Operationen auf Computern. Langzahldivisionen sind sogar noch teurer, wie können wir den Aufwand verringern?  
+
+Hierfür gibt es Berechnungen von Divisionsresten ohne (tatsächliche) Divisionen, nämlich 
+
+\begin{itemize}
+    \item Barrett Reduktion 
+    \item Montgomery Multiplikation
+\end{itemize}
+
+\paragraph{Barrett Reduktion} 
+
+Die Rechnung $(a\cdot b) / n$ wird berechnet als 
+
+$$\frac{a\cdot b}{b^{2k-t}} \cdot \frac{b^{2k}}{n} \cdot \frac{1}{b^t},$$
+
+wobei $b$ die Basis der Zahlendarstellung (in Digitalsystemen also 2) ist.
+
+\paragraph{Montgomery Multiplikation}
+
+Wenn $R$ eine Zweierpotenz ist und es ein $n'$ gibt, sodass $R \cdot R^{-1} - n\cdot n' = 1$, dann wird $a \cdot b \cdot R^{-1} \mod n$ berechnet mittels 
+
+$$\frac{a\cdot b + (a \cdot b \cdot n'\mod R \cdot n)}{R}.$$
+
+Hierfür benötigt es eine Hin- und Rücktransformation.
+
+Diese Ansätze sind nur bei mehreren modularen Multiplikationen hintereinander sinnvoll, ansonsten ist der Transformationsoverhead zu groß.
+
+\paragraph{Grundidee an Montgomery (todo)}
+
+Ein $k$-faches von $n$ zum Produkt addieren, so dass die letzten $i$ Stellen 0 werden, und sich damit die
+Division auf ein reines Shift beschränkt.  
+
+Wie bestimmt sich $k$? \newline
+Für die letzte Stelle $c$ muss (im Dezimalsystem) gelten: 
+
+\begin{align*}
+&c + k\cdot n = 0 \mod 10  \\
+ &\Rightarrow c = -k \cdot n \mod 10 \\
+ &\Rightarrow c \cdot -n^{-1} = k \mod 10
+\end{align*}
+
+Für die folgenden Stellen gilt analoges, nur mit entsprechendem Offset um $10^i$.  
+
+
+De facto also:
+Das Produkt mit dem negativen Inversen des Moduls multiplizieren (was ja gerade $n'$ ist), das ganze
+modulo $R$ rechnen (was ja die neue Basis darstellt und sich auf ein Bitmaskieren der letzten Bits
+beschränkt, wenn $R$ eine Zweierpotenz ist), mit dem Modulus multiplizieren und zum Produkt
+addieren. Damit sind garantiert die letzten Bits 0 und können durch die Division einfach rausgeshiftet
+werden.
+
+
+\paragraph{Montgomery Beispiel (todo)}
+
+Ein Beispiel im Dezimalsystem: Seien $a = 29, b = 48, n = 97$ und $R = 100$.
+
+\textit{Hintransformation}:
+
+\begin{align*}
+    a' = a \cdot R \mod n = 29 \cdot 100 \mod 97 = 2900 \mod 97 = 87 \\
+    b' = b \cdot R \mod n = 48 \cdot 100 \mod 97 = 4800 \mod 97 = 47
+\end{align*}
+
+\textit{Multiplikation}
+
+Es gilt $a' \cdot b' = 87 \cdot 47 = 4089$. Jetzt versuchen wir die letzte und vorletzte Stelle zu 0 zu machen:
+
+\begin{align*}
+    4089 + 3\cdot n = 408\textbf{9} + 3 \cdot 97 = 408\textbf{9} \cdot 29\textbf{1} = 4380 \\
+    43\textbf{8}0 + 60 \cdot n = 43\textbf{8}0 + 60 \cdot 97 = 43\textbf{8}0 + 85\textbf{2}0 = 10200
+\end{align*}
+
+Jetzt dividieren wir durch $R = 100$: $10200 / 100 = 102$.
+
+\textit{Rücktransformation}
+
+Wir berechnen 
+
+$$102 \cdot R^{-1} \mod n = 102 \cdot 100^{-1} \mod 97 = 102 \cdot 65 \mod 97 = 34.$$
+
+In der Gegenprobe haben wir $a \cdot b \mod n = 29 \cdot 48 \mod 97 = 34$.
+
+Für die Abschätzung von Montgomery haben wir das 
+
+\begin{lemma}
+    Seien $a, b, n \in \mathbb{N}$, dann gilt 
+    \begin{equation}
+        \frac{a\cdot b + (a\cdot b\cdot n' \mod R) \cdot n}{R} < 2n.
+    \end{equation}
+\end{lemma}
+
+\begin{proof} (Skizze):
+    Wir wissen $a, b < n$ und $R > n$. Daher gilt $a\cdot b < n^2$. Weiters gilt immer $a\cdot b \cdot n' \mod R < R$. Deswegen gilt 
+
+    $$\frac{a\cdot b + (a\cdot b\cdot n' \mod R) \cdot n}{R} < \frac{n^2 + R \cdot n}{R} = \frac{n^2}{R} + \frac{R\cdot n}{R} < n\cdot 1 + n = 2n.$$
+\end{proof}
+
+\paragraph{Mongomery Pseudocode (todo)}
+
+Eine komplette Montgomery Multiplikation ist daher:
+
+\begin{verbatim}
+Input: a, b
+Output: c = a*b mod n
+
+t = a * b
+c = t + (t*n' mod R)*n //mit R*R' - n*n' = 1
+c = c/R
+if (c > n)
+    c = c - n
+return c
+\end{verbatim}
+
+\begin{centering}
+Monty(a,b) = a*b*R-1 mod n \\
+Monty(a',b) = a*b mod n \\
+Monty(a',b') = a'*b' mod n \\
+Monty(a',1) = a mod n \\
+Monty(a,R*R) = a' mod n 
+\end{centering}
+
+\section{Exponentiation}
+
+Exponentiation ist eine häufige Operation, gerade bei RSA. Dabei hat der private Exponent häufig auch mindestens 1024 bits. 
+
+\subsection{Square-and-Multiply}
+
+Square-and-Multiply is die formalisierte Variante der ``Methode der wiederholten Quadrate''. Für jedes bit im Exponenten wird quadriert, wenn die bits 1 sind, dann 
+auch multipliziert.
+
+\begin{verbatim}
+    Berechne m = c^d 
+
+    m = 1
+    for jedes Bit i in d, beginnend bei MSB, do 
+        m = m*m 
+        if (i = 1) then
+            m = m \cdot c
+    end 
+    return m
+\end{verbatim}
+
+\paragraph{Beispiel} Berechnen von $x^12$ mittels Square-and-Multiply, dafür betrachten wir die Binärdarstellung $12 = b1100$:
+
+\begin{verbatim}
+    m = 1
+
+    # i = 1, erstes bit, beginnend beim größten
+    m = m * m = 1
+    m = m * x = x
+
+    # i = 1, zweites bit
+    m = m * m = x^2
+    m = m * x = x^3
+
+    # i = 0, drittes bit
+    m = m * m = x^6
+
+    # i = 0, viertes bit
+    m = m * m = x^12
+\end{verbatim}
+
+Hier fällt auf: je mehr \verb|1|er in der Binärdarstellung der Exponenten, desto größer ist unser Rechenaufwand.
+
+
+\paragraph{Beispiel} Wir berechnen eine RSA Verschlüsselung mit $m = 7, p = 5$ und $q = 11$.
+
+Wir haben $\varphi = 40$ und wählen $e = 3$, dann gilt $d = 27$ und $c = m^e \mod (p\cdot q) = 7^3 \mod 55 = 13$. Mittels Square-and-Multiply berechnen wir $m = c^d = 7$:
+
+\begin{verbatim}
+    27 = b11011
+
+    m = 1
+
+    # i = 1
+    m = m * m = 1
+    m = m * c = 13
+
+    # i = 1 
+    m = m * m = 13 * 13 mod 55 = 4
+    m = m * c = 4 * 13 mod 55 = 52
+
+    # i = 0
+    m = m * m = 52 * 52 mod 55 = 9
+
+    # i = 1
+    m = m * m = 9 * 9 mod 55 = 26
+    m = m * c = 26 * 13 mod 55 = 8 
+
+    # i = 1 
+    m = m * m = 8 * 8 mod 55 = 9
+    m = m * c = 9 * 13 mod 55 = 7
+\end{verbatim}
+
+\subsection{NAF - Non-adjacent Form}
+
+Im Durchschnitt braucht es für die Berechnung einer Exponentiation mit einem $n$-bit Exponenten:
+
+\begin{itemize}
+    \item $n/2$ Multiplikationen und
+    \item $n$ Quadrierungen.
+\end{itemize}
+
+Unter Verwendung einer vorzeichenbehafteten Darstellung des Exponenten (mit $-1, 0$ und $1$) kann die Anzahl der Multiplikationen auf $n/3$ reduzier werden. In diesem Fall
+wird die NAF de Exponenten berechnet.
+
+\paragraph{Eigenschaften}
+
+\begin{itemize}
+    \item Sie ist eindeutig
+    \item Sie hat die wenigsten Elemente ungleich 0 aller vorzeichenbehafteten Darstellungen
+    \item Sie ist maximal $n+1$ bit lang 
+    \item Es folgen niemals zwei Elemente ungleich 0 aufeinander 
+    \item Sie hat durchschnittlich n/3 Elemente ungleich 0
+\end{itemize}
