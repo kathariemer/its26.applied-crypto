@@ -143,9 +143,69 @@ Im ersten Public-Key Cryptography Standards (PKCS) < v2.0:
     \item Bleichenbacher Angriff (\url{https://web.archive.org/web/20120204040056/}, \url{http://www.bell-labs.com/user/bleichen/papers/pkcs.ps})
 \end{itemize}
 
-Mittlerweile ist üblicherweise Optimal Asymmetric Encryption Padding (OAEP), eingeführt in PKCS\#1 v2.0
+Mittlerweile iwrd üblicherweise Optimal Asymmetric Encryption Padding (OAEP) verwendet, eingeführt in PKCS\#1 v2.0
 
-\section{OAEP}
+\section{OAEP (Optimal Asymmetric Encryption Padding)}
+
+\paragraph{Ablauf}
+
+Sei $M$ eine Nachricht der Länge $m$ und $h$ die Länge des Hashes.
+
+\begin{enumerate}
+    \item Label $L$ wird gehasht, Ergebnis ist $l_{Hash}$
+    \item Padding String $p$ aus 0x00 wird an $l_{Hash}$ angehängt, sodass die resultierende Länge um ($m + h + 2$) Bytes kürzer ist als der RSA Modulus in Bytes ($k$)
+    \item es wird 0x01 und $M$ an den Block angehängt, daraus resultiert Data Block (DB), der um $h+1$ Bytes kürzer ist als $k$
+    \begin{itemize}
+        \item DB = $l_{Hash}$ || $p$ || 0x01 || $M$
+    \end{itemize}
+    \item Ein zufälliger String $r$ (ein sog. seed) mit Länge $h$ wird erzeugt
+    \item $r$ wird mittels der Mask Generation Function (MGF) auf die Länge $(k - h - 1)$ Bytes vergrößert und mit DB verxort, das Ergebnis ist $DB_{masked}$
+    \item $DB_{masked}$ wird mittels MGF auf die Länge $h$ verkleinert und mit $r$ verxort, das Ergebnis ist $r_{masked}$
+    \item Encoded Message (EM) entsteht durch Konkatenation von 0x00, $r_{masked}$ und $DB_{masked}$
+    \begin{itemize}
+        \item EM = 0x00 || $r_{masked}$ || $DB_{masked}$
+        \item Das erste 0 Byte dient dazu, zu garantieren, dass EM tatsächlich kleiner ist als der Modulus $n$: beide haben $k$ Byte, aber da in EM das höchstwertige Byte 
+        0 ist, gilt sicher immer: EM $< n$.
+    \end{itemize}
+    \item EM wird mittels RSA verschlüsselt, d.h. $C = \text{EM}^e \mod n$
+\end{enumerate}
+
+\begin{figure}[h]
+    \includegraphics[width=0.4\textwidth]{figures/fig8-oaep}
+    \centering
+    \caption{Ablauf OAEP Verschlüsselung}
+\end{figure}
+
+\paragraph{Entschlüsselung}
+
+\begin{enumerate}
+    \item Empfänger bekommt Ciphertext $C$ und Label $L$
+    \item Generiert EM aus $C$ mittels seines privaten Schlüssels, dabei muss das erste Byte von EM 0x00 sein
+    \item Die nächsten $h$-Bytes sind $r_{masked}$, der Rest ($k - h - 1$) ist $DB_{masked}$
+    \item $DB_{masked}$ wird mittels MGF auf Länge $h$ gebracht und mit $r_{masked}$ verxort, resultiert im Seed $r$
+    \item $r$ wird mittels MGF auf Länge von $DB_{masked}$ gebracht und damit verxort, ergibt $DB$
+    \item $DB$ muss beginnen mit dem Hash von $L$ (bzw. Hash des leeren Strings in PKCS\#1), gefolgt von beliebig vielen 0x00 und einer 0x01
+    \item Nach 0x01 steht die Nachricht $M$
+\end{enumerate}
+
+Sowohl $DB_{masked}$ als auch $r_{masked}$ müssen vollständig bekannt sein, um $M$ zu rekonstruieren zu können. Mittels $DB_{masked}$ kann $r$ rekonstruiert werden, 
+mittels $r$ dann $DB$ und in Folge $M$.
+OAEP erschwert die Rekonstruktion des Klartextes für einen Angreifer. \\
+
+\noindent Die in PKCS\#1 empfohlene Parameter für RSAES-OAEP sind 
+\begin{itemize}
+    \item Hash: SHA-1/256/384/512, d.h. die Hashlänge ist 20, 32, 48 oder 64 Bytes
+    \item Mask Generation Function: MGF1
+    \begin{itemize}
+        \item $k$ Runden, in jeder Runde werden $h$ Bytes zum Output hinzugefügt, bis die gewünschte Länge erreicht ist
+        \item In jeder Runde:
+        \begin{itemize}
+            \item 32-bit Zähler wird inkrementiert
+            \item Initialwert wird mit aktuellem Zähler konkateniert und gehasht
+            \item Ergebnis wird an Endergebnis angehängt
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
 
 % \begin{itemize}
