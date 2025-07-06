@@ -269,6 +269,11 @@ Hardwareimplementierungen.
     \item Für das Endergebnis werden beide Hälften zusammengefügt und final permutiert, das Ergebnis hat wie der Input 64 Bit.
 \end{enumerate}
 
+Die Entschlüsselung erfolgt bei DES völlig symmetrisch zur Verschlüsselung, einzig die Rundenkeys müssen in umgekehrter Reihenfolge erzeugt und verwendet werden.
+
+Die zertifizierten Modi von DES sind ECB, CBC, OFB (Output Feedback Mode) und CFB (Cipher feedback). Implementierungen: zwischen 700 Mbit/sec (Software, OpenSSL) und 
+768.000.000.000 keys/sec (Hardware, crack.sh). Der DES wird heute nicht mehr weiterentwickelt.
+
 Betrachten wir die einzelnen Schritte:
 
 \paragraph{Initiale und finale Permutation}
@@ -283,85 +288,363 @@ werden sie oft ausgelassen, weil sie dort schwer und mit vielen Bitoperationen i
     \caption{Initiale Permutation der 64 Bit, Quelle: Bourrichon, \href{https://creativecommons.org/licenses/by-sa/4.0}{CC BY-SA 4.0}, via Wikimedia Commons}
 \end{figure}
 
-\paragraph{Key Transformation}
+\paragraph{Key Transformation mit Compression Permutation}
 
 Bei der Key Transformation wird vom 64-Bit Key jedes 8. Bit verworfen. Die übrigen Bits werden in zwei Hälften zu je 28 Bit geteilt und in 16 Runden zirkulär nach links 
 geshiftet. Dabei wird fast immer um 2 Bit geshiftet, außer in Runden 1, 2, 9 und 16, wo nur um 1 Bit geshiftet wird.
 
 \begin{table}[h]
-\centering
-\begin{tabular}{|*{16}{c|}}
-\hline
-% Row 1 (cells 1-16)
-\cellcolor{red-1}1 & \cellcolor{red-1}2 & \cellcolor{red-1}3 & \cellcolor{red-1}4 & 
-\cellcolor{red-1}5 & \cellcolor{red-1}6 & \cellcolor{red-1}7 & \cellcolor{red-1}8 & 
-\cellcolor{yellow-1}9 & \cellcolor{yellow-1}10 & \cellcolor{yellow-1}11 & \cellcolor{yellow-1}12 & 
-\cellcolor{yellow-1}13 & \cellcolor{yellow-1}14 & \cellcolor{yellow-1}15 & \cellcolor{yellow-1}16 \\
-\hline
-% Row 2 (cells 17-32)
-\cellcolor{green-1}17 & \cellcolor{green-1}18 & \cellcolor{green-1}19 & \cellcolor{green-1}20 & 
-\cellcolor{green-1}21 & \cellcolor{green-1}22 & \cellcolor{green-1}23 & \cellcolor{green-1}24 & 
-\cellcolor{blue-1}25 & \cellcolor{blue-1}26 & \cellcolor{blue-1}27 & \cellcolor{blue-1}28 & 
-\cellcolor{blue-1}29 & \cellcolor{blue-1}30 & \cellcolor{blue-1}31 & \cellcolor{blue-1}32 \\
-\hline
-% Row 3 (cells 33-48)
-\cellcolor{orange-1}33 & \cellcolor{orange-1}34 & \cellcolor{orange-1}35 & \cellcolor{orange-1}36 & 
-\cellcolor{orange-1}37 & \cellcolor{orange-1}38 & \cellcolor{orange-1}39 & \cellcolor{orange-1}40 & 
-\cellcolor{purple-1}41 & \cellcolor{purple-1}42 & \cellcolor{purple-1}43 & \cellcolor{purple-1}44 & 
-\cellcolor{purple-1}45 & \cellcolor{purple-1}46 & \cellcolor{purple-1}47 & \cellcolor{purple-1}48 \\
-\hline
-% Row 4 (cells 49-64)
-\cellcolor{cyan-1}49 & \cellcolor{cyan-1}50 & \cellcolor{cyan-1}51 & \cellcolor{cyan-1}52 & 
-\cellcolor{cyan-1}53 & \cellcolor{cyan-1}54 & \cellcolor{cyan-1}55 & \cellcolor{cyan-1}56 & 
-\cellcolor{magenta-1}57 & \cellcolor{magenta-1}58 & \cellcolor{magenta-1}59 & \cellcolor{magenta-1}60 & 
-\cellcolor{magenta-1}61 & \cellcolor{magenta-1}62 & \cellcolor{magenta-1}63 & \cellcolor{magenta-1}64 \\
-\hline
-\end{tabular}
-\caption{Input Array für den Schlüssel mit 64 Bit}
+    \centering
+        \begin{tabular}{|*{16}{c|}}
+        \hline
+        % Row 1 (cells 1-16)
+        \cellcolor{red-1}1 & \cellcolor{red-1}2 & \cellcolor{red-1}3 & \cellcolor{red-1}4 & 
+        \cellcolor{red-1}5 & \cellcolor{red-1}6 & \cellcolor{red-1}7 & \cellcolor{red-1}8 & 
+        \cellcolor{yellow-1}9 & \cellcolor{yellow-1}10 & \cellcolor{yellow-1}11 & \cellcolor{yellow-1}12 & 
+        \cellcolor{yellow-1}13 & \cellcolor{yellow-1}14 & \cellcolor{yellow-1}15 & \cellcolor{yellow-1}16 \\
+        \hline
+        % Row 2 (cells 17-32)
+        \cellcolor{green-1}17 & \cellcolor{green-1}18 & \cellcolor{green-1}19 & \cellcolor{green-1}20 & 
+        \cellcolor{green-1}21 & \cellcolor{green-1}22 & \cellcolor{green-1}23 & \cellcolor{green-1}24 & 
+        \cellcolor{blue-1}25 & \cellcolor{blue-1}26 & \cellcolor{blue-1}27 & \cellcolor{blue-1}28 & 
+        \cellcolor{blue-1}29 & \cellcolor{blue-1}30 & \cellcolor{blue-1}31 & \cellcolor{blue-1}32 \\
+        \hline
+        % Row 3 (cells 33-48)
+        \cellcolor{orange-1}33 & \cellcolor{orange-1}34 & \cellcolor{orange-1}35 & \cellcolor{orange-1}36 & 
+        \cellcolor{orange-1}37 & \cellcolor{orange-1}38 & \cellcolor{orange-1}39 & \cellcolor{orange-1}40 & 
+        \cellcolor{purple-1}41 & \cellcolor{purple-1}42 & \cellcolor{purple-1}43 & \cellcolor{purple-1}44 & 
+        \cellcolor{purple-1}45 & \cellcolor{purple-1}46 & \cellcolor{purple-1}47 & \cellcolor{purple-1}48 \\
+        \hline
+        % Row 4 (cells 49-64)
+        \cellcolor{cyan-1}49 & \cellcolor{cyan-1}50 & \cellcolor{cyan-1}51 & \cellcolor{cyan-1}52 & 
+        \cellcolor{cyan-1}53 & \cellcolor{cyan-1}54 & \cellcolor{cyan-1}55 & \cellcolor{cyan-1}56 & 
+        \cellcolor{magenta-1}57 & \cellcolor{magenta-1}58 & \cellcolor{magenta-1}59 & \cellcolor{magenta-1}60 & 
+        \cellcolor{magenta-1}61 & \cellcolor{magenta-1}62 & \cellcolor{magenta-1}63 & \cellcolor{magenta-1}64 \\
+        \hline
+        \end{tabular}
+    \caption{Input Array für den Schlüssel mit 64 Bit}
 \end{table}
 
 \begin{table}[h]
-\centering
-\begin{minipage}[t]{0.45\textwidth}
-    \begin{tabular}{|*{7}{c|}}
-        \hline
-        \cellcolor{magenta-1}57 & \cellcolor{cyan-1}49 & \cellcolor{purple-1}41 & \cellcolor{orange-1}33 & 
-        \cellcolor{blue-1}25 & \cellcolor{green-1}17 & \cellcolor{yellow-1}9 \\
+    \centering
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{tabular}{|*{7}{c|}}
+            \hline
+            \cellcolor{magenta-1}57 & \cellcolor{cyan-1}49 & \cellcolor{purple-1}41 & \cellcolor{orange-1}33 & 
+            \cellcolor{blue-1}25 & \cellcolor{green-1}17 & \cellcolor{yellow-1}9 \\
 
-        \hline
-        \cellcolor{red-1}1 & \cellcolor{magenta-1}58 & \cellcolor{cyan-1}50 & \cellcolor{purple-1}42 & 
-        \cellcolor{orange-1}34 & \cellcolor{blue-1}26 & \cellcolor{green-1}18 \\
+            \hline
+            \cellcolor{red-1}1 & \cellcolor{magenta-1}58 & \cellcolor{cyan-1}50 & \cellcolor{purple-1}42 & 
+            \cellcolor{orange-1}34 & \cellcolor{blue-1}26 & \cellcolor{green-1}18 \\
 
-        \hline
-        \cellcolor{yellow-1}10 & \cellcolor{red-1}2 & \cellcolor{magenta-1}59 & \cellcolor{cyan-1}51 & 
-        \cellcolor{purple-1}43 & \cellcolor{orange-1}35 & \cellcolor{blue-1}27 \\
+            \hline
+            \cellcolor{yellow-1}10 & \cellcolor{red-1}2 & \cellcolor{magenta-1}59 & \cellcolor{cyan-1}51 & 
+            \cellcolor{purple-1}43 & \cellcolor{orange-1}35 & \cellcolor{blue-1}27 \\
 
-        \hline
-        \cellcolor{green-1}19 & \cellcolor{yellow-1}11 & \cellcolor{red-1}3 & \cellcolor{magenta-1}60 & 
-        \cellcolor{cyan-1}52 & \cellcolor{purple-1}44 & \cellcolor{orange-1}36  \\
-        \hline
-    \end{tabular}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.45\textwidth}
-    \begin{tabular}{|*{7}{c|}}
-        \hline
-        \cellcolor{magenta-1}63 & \cellcolor{cyan-1}55 & \cellcolor{purple-1}47 & \cellcolor{orange-1}39 & 
-        \cellcolor{blue-1}31 & \cellcolor{green-1}23 & \cellcolor{yellow-1}15 \\
-        
-        \hline
-        \cellcolor{red-1}7 & \cellcolor{magenta-1}62 & \cellcolor{cyan-1}54 & \cellcolor{purple-1}46 & 
-        \cellcolor{orange-1}38 & \cellcolor{blue-1}30 & \cellcolor{green-1}22 \\
-        
-        \hline
-        \cellcolor{yellow-1}14 & \cellcolor{red-1}6 & \cellcolor{magenta-1}61 & \cellcolor{cyan-1}53 & 
-        \cellcolor{purple-1}45 & \cellcolor{orange-1}37 & \cellcolor{blue-1}29 \\
-        
-        \hline
-        \cellcolor{green-1}21 & \cellcolor{yellow-1}13 & \cellcolor{red-1}5 & \cellcolor{blue-1}28 & 
-        \cellcolor{green-1}20 & \cellcolor{yellow-1}12 & \cellcolor{red-1}4  \\
-        \hline
-    \end{tabular}
-\end{minipage}
-\caption{Output Arrays mit den Schlüsseln $K_1$ und $K_2$}
+            \hline
+            \cellcolor{green-1}19 & \cellcolor{yellow-1}11 & \cellcolor{red-1}3 & \cellcolor{magenta-1}60 & 
+            \cellcolor{cyan-1}52 & \cellcolor{purple-1}44 & \cellcolor{orange-1}36  \\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{tabular}{|*{7}{c|}}
+            \hline
+            \cellcolor{magenta-1}63 & \cellcolor{cyan-1}55 & \cellcolor{purple-1}47 & \cellcolor{orange-1}39 & 
+            \cellcolor{blue-1}31 & \cellcolor{green-1}23 & \cellcolor{yellow-1}15 \\
+
+            \hline
+            \cellcolor{red-1}7 & \cellcolor{magenta-1}62 & \cellcolor{cyan-1}54 & \cellcolor{purple-1}46 & 
+            \cellcolor{orange-1}38 & \cellcolor{blue-1}30 & \cellcolor{green-1}22 \\
+
+            \hline
+            \cellcolor{yellow-1}14 & \cellcolor{red-1}6 & \cellcolor{magenta-1}61 & \cellcolor{cyan-1}53 & 
+            \cellcolor{purple-1}45 & \cellcolor{orange-1}37 & \cellcolor{blue-1}29 \\
+
+            \hline
+            \cellcolor{green-1}21 & \cellcolor{yellow-1}13 & \cellcolor{red-1}5 & \cellcolor{blue-1}28 & 
+            \cellcolor{green-1}20 & \cellcolor{yellow-1}12 & \cellcolor{red-1}4  \\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \caption{Output Arrays mit den Schlüsseln $K_1$ und $K_2$}
 \end{table}
+
+Nach dem Shiften werden aus den übrigen 56 Bits 48 ausgewählt und permutiert (``Compression Permutation''\index{Compression Permutation}):
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|*{14}{c|}}
+        \hline
+        % Row 1 
+        \cellcolor{red-1}1 & \cellcolor{red-1}2 & \cellcolor{red-1}3 & \cellcolor{red-1}4 & 
+        \cellcolor{red-1}5 & \cellcolor{red-1}6 & \cellcolor{red-1}7 & \cellcolor{red-1}8 & 
+        \cellcolor{orange-1}9 & \cellcolor{orange-1}10 & \cellcolor{orange-1}11 & \cellcolor{orange-1}12 & 
+        \cellcolor{orange-1}13 & \cellcolor{orange-1}14\\
+        \hline
+        % Row 2 
+        \cellcolor{orange-1}15 & \cellcolor{orange-1}16 & 
+        \cellcolor{yellow-1}17 & \cellcolor{yellow-1}18 & \cellcolor{yellow-1}19 & \cellcolor{yellow-1}20 & 
+        \cellcolor{yellow-1}21 & \cellcolor{yellow-1}22 & \cellcolor{yellow-1}23 & \cellcolor{yellow-1}24 & 
+        \cellcolor{green-1}25 & \cellcolor{green-1}26 & \cellcolor{green-1}27 & \cellcolor{green-1}28 \\
+        \hline
+        % Row 3 
+        \cellcolor{green-1}29 & \cellcolor{green-1}30 & \cellcolor{green-1}31 & \cellcolor{green-1}32 &
+        \cellcolor{cyan-1}33 & \cellcolor{cyan-1}34 & \cellcolor{cyan-1}35 & \cellcolor{cyan-1}36 & 
+        \cellcolor{cyan-1}37 & \cellcolor{cyan-1}38 & \cellcolor{cyan-1}39 & \cellcolor{cyan-1}40 & 
+        \cellcolor{blue-1}41 & \cellcolor{blue-1}42 \\
+        \hline 
+        % Row 4 
+        \cellcolor{blue-1}43 & \cellcolor{blue-1}44 & 
+        \cellcolor{blue-1}45 & \cellcolor{blue-1}46 & \cellcolor{blue-1}47 & \cellcolor{blue-1}48 &
+        \cellcolor{purple-1}49 & \cellcolor{purple-1}50 & \cellcolor{purple-1}51 & \cellcolor{purple-1}52 & 
+        \cellcolor{purple-1}53 & \cellcolor{purple-1}54 & \cellcolor{purple-1}55 & \cellcolor{purple-1}56 \\
+        \hline
+    \end{tabular}
+    \caption{Input Array für mit 56 Bit}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|*{12}{c|}}
+        \hline
+        % Row 1 
+        \cellcolor{orange-1}14 & \cellcolor{yellow-1}17 & \cellcolor{orange-1}11 & \cellcolor{yellow-1}24 & 
+        \cellcolor{red-1}1 & \cellcolor{red-1}5 & \cellcolor{red-1}3 & \cellcolor{green-1}28 &
+        \cellcolor{orange-1}15 & \cellcolor{red-1}6 & \cellcolor{yellow-1}21 & \cellcolor{orange-1}10 \\
+        \hline 
+        
+        % Row 2 
+        \cellcolor{yellow-1}23 & \cellcolor{yellow-1}19 & \cellcolor{orange-1}12 & \cellcolor{red-1}4 & 
+        \cellcolor{green-1}26 & \cellcolor{red-1}8 & \cellcolor{orange-1}16 & \cellcolor{red-1}7 & 
+        \cellcolor{green-1}27 & \cellcolor{yellow-1}20 & \cellcolor{orange-1}13 & \cellcolor{red-1}2 \\
+        \hline
+
+        
+        % Row 3  
+        \cellcolor{blue-1}41 & \cellcolor{purple-1}52 & \cellcolor{green-1}31 & \cellcolor{cyan-1}37 & 
+        \cellcolor{blue-1}47 & \cellcolor{purple-1}55 & \cellcolor{green-1}30 & \cellcolor{cyan-1}40 & 
+        \cellcolor{purple-1}51 & \cellcolor{blue-1}45 & \cellcolor{cyan-1}33 & \cellcolor{blue-1}48 \\
+        \hline
+
+        % Row 4 
+        \cellcolor{blue-1}44 & \cellcolor{purple-1}49 & \cellcolor{cyan-1}39 & \cellcolor{purple-1}56 &
+        \cellcolor{cyan-1}34 & \cellcolor{purple-1}53 & \cellcolor{blue-1}46 & \cellcolor{blue-1}42 &
+        \cellcolor{purple-1}50 & \cellcolor{cyan-1}36 & \cellcolor{green-1}29 & \cellcolor{green-1}32 \\
+        \hline
+    \end{tabular}
+    \caption{Output Array nach ``Compression Permutation'' (48 bit)}
+\end{table}
+
+\begin{itemize}
+    \item Weil jedes 8te Bit im Key ein Parity Bit ist, ist die faktische Länge des Keys statt 64 nur 56 Bit. 
+    \item Für jede Runde muss ein anderer Schlüssel verwendet werden 
+    \item Shiften ist schnell und billig in HW implementierbar 
+    \item In keiner Runde wird der gesamte Schlüssel verwendet 
+    \item Sicher gegen Related Key Analysis
+\end{itemize}
+
+\paragraph{Expansion Permutation}
+
+In jeder Runde wird die Hälfte $R_i$ (32 Bit) mit dem 48 Bit Key xor-t werden. Dafür wird die Expansion Permutation \index{Expansion Permutation} verwendet. Hier gibt
+es einen Lawinen Effekt (Avalanche Effect), wo möglichst viele Input Bits den Output beeinflussen (und umgekehrt). Das jeweils 1. und 4. Bit eines Blocks wird verdoppelt.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|*{8}{c|}}
+        \hline
+        % Row 1 
+        \cellcolor{red-1}1 & \cellcolor{red-1}2 & \cellcolor{red-1}3 & \cellcolor{red-1}4 & 
+        \cellcolor{red-1}5 & \cellcolor{red-1}6 & \cellcolor{red-1}7 & \cellcolor{red-1}8 \\
+        \hline 
+        % Row 2 
+        \cellcolor{orange-1}9 & \cellcolor{orange-1}10 & \cellcolor{orange-1}11 & \cellcolor{orange-1}12 & 
+        \cellcolor{orange-1}13 & \cellcolor{orange-1}14 & \cellcolor{orange-1}15 & \cellcolor{orange-1}16 \\
+        \hline 
+        % Row 3
+        \cellcolor{yellow-1}17 & \cellcolor{yellow-1}18 & \cellcolor{yellow-1}19 & \cellcolor{yellow-1}20 & 
+        \cellcolor{yellow-1}21 & \cellcolor{yellow-1}22 & \cellcolor{yellow-1}23 & \cellcolor{yellow-1}24 \\
+        \hline
+        % Row 4 
+        \cellcolor{green-1}25 & \cellcolor{green-1}26 & \cellcolor{green-1}27 & \cellcolor{green-1}28 &
+        \cellcolor{green-1}29 & \cellcolor{green-1}30 & \cellcolor{green-1}31 & \cellcolor{green-1}32 \\
+        \hline 
+    \end{tabular}
+    \caption{Input Array $R_i$ (32 Bit)}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|*{12}{c|}}
+        \hline
+        % Row 1 
+        \cellcolor{green-1}32 &
+        \cellcolor{red-1}1 & \cellcolor{red-1}2 & \cellcolor{red-1}3 & \cellcolor{red-1}4 & 
+        \cellcolor{red-1}5 & \cellcolor{red-1}6 & \cellcolor{red-1}7 & \cellcolor{red-1}8 & \cellcolor{orange-1}9\\
+        \hline 
+        % Row 2 
+        \cellcolor{red-1}8 &
+        \cellcolor{orange-1}9 & \cellcolor{orange-1}10 & \cellcolor{orange-1}11 & \cellcolor{orange-1}12 & 
+        \cellcolor{orange-1}13 & \cellcolor{orange-1}14 & \cellcolor{orange-1}15 & \cellcolor{orange-1}16 & \cellcolor{yellow-1}17 \\
+        \hline 
+        % Row 3
+        \cellcolor{orange-1}16 &
+        \cellcolor{yellow-1}17 & \cellcolor{yellow-1}18 & \cellcolor{yellow-1}19 & \cellcolor{yellow-1}20 & 
+        \cellcolor{yellow-1}21 & \cellcolor{yellow-1}22 & \cellcolor{yellow-1}23 & \cellcolor{yellow-1}24 & \cellcolor{green-1}25\\
+        \hline
+        % Row 4 
+        \cellcolor{yellow-1}24 &
+        \cellcolor{green-1}25 & \cellcolor{green-1}26 & \cellcolor{green-1}27 & \cellcolor{green-1}28 &
+        \cellcolor{green-1}29 & \cellcolor{green-1}30 & \cellcolor{green-1}31 & \cellcolor{green-1}32 & \cellcolor{red-1}1\\
+        \hline 
+    \end{tabular}
+    \caption{Zwischenergebnis Array für Expansion Permutation}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|*{12}{c|}}
+        \hline
+        % Row 1 
+        \cellcolor{orange-1}14 & \cellcolor{yellow-1}17 & \cellcolor{orange-1}11 & \cellcolor{yellow-1}24 & \cellcolor{red-1}1 & 
+        \cellcolor{red-1}5 & \cellcolor{red-1}3 & \cellcolor{green-1}28 & \cellcolor{orange-1}15 & \cellcolor{red-1}6 & 
+        \cellcolor{yellow-1}21 & \cellcolor{orange-1}10 \\
+        \hline 
+        % Row 2 
+        \cellcolor{yellow-1}23 & \cellcolor{yellow-1}19 & \cellcolor{orange-1}12 & \cellcolor{red-1}4 & \cellcolor{green-1}26 & 
+        \cellcolor{red-1}8 & \cellcolor{orange-1}16 & \cellcolor{red-1}7 & \cellcolor{green-1}27 & \cellcolor{yellow-1}20 & 
+        \cellcolor{orange-1}13 & \cellcolor{red-1}2 \\
+        \hline 
+        % Row 3
+        \cellcolor{blue-1}41 & \cellcolor{blue-1}52 & \cellcolor{green-1}31 & \cellcolor{blue-1}37 & \cellcolor{blue-1}47 & 
+        \cellcolor{blue-1}55 & \cellcolor{green-1}30 & \cellcolor{blue-1}40 & \cellcolor{blue-1}51 & \cellcolor{blue-1}45 & 
+        \cellcolor{blue-1}33 & \cellcolor{blue-1}48 \\
+        \hline
+        % Row 4 
+        \cellcolor{blue-1}44 & \cellcolor{blue-1}49 & \cellcolor{blue-1}39 & \cellcolor{blue-1}56 & \cellcolor{blue-1}34 & 
+        \cellcolor{blue-1}53 & \cellcolor{blue-1}46 & \cellcolor{blue-1}42 & \cellcolor{blue-1}50 & \cellcolor{blue-1}36 & 
+        \cellcolor{green-1}29 & \cellcolor{green-1}32 \\
+        \hline 
+    \end{tabular}
+    \caption{Output Array nach Expansion Permutation (sic)}
+\end{table}
+
+\begin{itemize}
+    \item Der Datenblock muss auf Schlüsselgröße erweitert werden
+    \item Durch Wiederholung einzelner Bits breitet sich Einfluss des Inputs aufden Output schneller aus (ein Inputbit beeinflusst 2 S-Box Lookups)
+\end{itemize}
+
+\paragraph{S-Boxen}
+
+Der expandierte Block $R_i$ wird mit dem komprimierten Rundenschlüssel ver-xor-t. Der resultierende 48 Bit Block wird in 8 6er-Blöcke aufgeteilt. Jeder dieser 6 Bit 
+Blöcke kommt in eine eigene S-Box.
+
+Jede S-Box enthält 4 Zeilen zu je 16 Spalten und hat 4 Bit große Einträge.
+
+\begin{itemize}
+    \item Bits (1, 6) indizieren die Zeile (00, 01, 10, 11)
+    \item Bits (2, 3, 4, 5) indizieren die Spalte (0000, 0001, \ldots, 1111)
+    \item Beispiel: Der 6 Bit Input \verb|100111| wird auf den Eintrag in Zeile 4 (\verb|11|), Spalte 4 (\verb|0011|) gemapped
+\end{itemize}
+
+Aus den 48 (= $8 \cdot 6$) Bit Input wird über eine nicht-lineare Operation so ein 32 (= $8 \cdot 4$) Output generiert. Dieser Schritt ist besonders wichtig in DES.
+
+Die Designkriterien für die S-Boxen (vgl. Don Coppersmith, The Data Encryption Standard (DES) and its strength against attacks) waren: 
+\begin{itemize}
+    \item Wegen HW und Technologie Beschränkungen (1974) waren nicht mehr als 6 Input- und 4 Output-Bits möglich 
+    \item Kein Output Bit darf nahe einer linearen Funktion der Input Bits sein 
+    \begin{itemize}
+        \item Für jedes Output Bit und jeder Menge der 6 Input Bits ist das XOR dieser Inputs in ca. 50\% der Fälle gleich dem Output Bit
+    \end{itemize}
+    \item Jeder mögliche 4-Bit Output wird angenommen
+    \item Wenn sich 2 Inputs um 1 Bit unterschieden, unterschiedet sich der Output um mindestens 2 Bit
+    \item Wenn sich 2 Inputs nur in den beiden mittleren Bits unterscheiden, unterscheidet sich der Output in mindestens 2 Bit
+    \item Wenn die ersten beiden Bits zweier Inputs anders, die letzten beiden gleich sind, dann ist der Output niemals ident
+\end{itemize}
+
+\paragraph{P-Boxen}
+
+Nach der Substitution werden die 32 Bit noch einmal permutiert. Zum Abschluss werden die 32 Bit noch mit der linken Datenhälfte ver-xor-t. 
+Danach werden $R_i$ und $L_i$ vertauscht. (todo: Tabelle einfügen)
+
+Die Designkriterien der P-Boxen waren:
+
+\begin{itemize}
+    \item Die Output Bits von Runde $i$ (4 Bit) werden so verteilt, dass
+    \begin{itemize}
+        \item zwei der Bits in der Folgerunde zu den ``mittleren'' Bits einer S-Box werden. 
+        \item zwei der Bits in der Folgerunde zu den ``Endbits'' werden. 
+        \item sechs unterschiedliche S-Boxen dadurch beeinflusst werden.
+    \end{itemize}
+\end{itemize}
+
+\paragraph{DES Runden}
+
+\begin{figure}[h]
+    \includegraphics[width=0.8\textwidth]{figures/fig5-des-round.png}
+    \centering
+    \caption{Eine Runde in DES, Bruce Schneier, Applied Cryptography, 2nd Edition, Fig. 12.2}
+\end{figure}
+
+
+Nach 5 Runden ist jedes Outputbit eine Funktion jedes Input- und jedes Keybits.
+Nach 8 Runden ist der Output quasi eine Zufallsfunktion -- aber durch differentielle Kryptoanalyse ((wieder)entdeckt 1990)
+kann jede DES Implementierung innerhalb von 16 Runden gebrochen werden. 
+
+\paragraph{Sicherheitsbetrachtungen div. Schlüssel}
+
+Es gibt Weak Keys \index{Weak keys}, bei diesen besteht mindestens eine Hälfte (potentiell der gesamte Schlüssel) aus nur \verb|0| oder \verb|1|. Dadurch wird in jeder 
+Runde derselbe Subkey erzeugt. Es gibt 4 verschiedene Weak Keys:
+
+\begin{itemize}
+    \item \verb|0x0101010101010101|
+    \item \verb|0xFEFEFEFEFEFEFEFE|
+    \item \verb|0xE0E0E0E0F1F1F1F1|
+    \item \verb|0x1F1F1F1F0E0E0E0E|
+\end{itemize}
+
+Bei Semiweak Keys \index{Semiweak Keys} werden statt 16 unterschiedlicher Subkeys nur 2 erzeugt. Nachrichten die mit einem der Schlüsseln aus so einem Paar verschlüsselt 
+werden, können auch mit dem anderen entschlüsselt werden. Von diesen Paaren gibt es 6:
+
+\begin{itemize}
+    \item \verb|0x011F011F010E010E| und \verb|0x1F011F010E010E01|
+    \item \verb|0x01E001E001F101F1| und \verb|0xE001E001F101F101|
+    \item \verb|0x01FE01FE01FE01FE| und \verb|0xFE01FE01FE01FE01|
+    \item \verb|0x1FE01FE00EF10EF1| und \verb|0xE01FE01FF10EF10E|
+    \item \verb|0x1FFE1FFE0EFE0EFE| und \verb|0xFE1FFE1FFE0EFE0E|
+    \item \verb|0xE0FEE0FEF1FEF1FE| und \verb|0xFEE0FEE0FEF1FEF1|
+\end{itemize}
+
+Weiters gibt es auch Possibly Weak Keys, diese erzeugen nur 4 unterschiedliche Subkeys, von denen gibt es 48.\\
+
+Die Eigenschaft Complement Keys \index{Complement Keys} beschreibt, dass das Einser-Komplement eines Schlüssels das Einser-Komplement eines Klartextes zum 
+Einser-Komplement des Ciphertexts verschlüsselt: 
+
+$$\text{DES}(p, k) = c \Rightarrow \text{DES}(\lnot p, \lnot k) = \lnot c$$
+
+Damit muss ein Brute-Force Angreifer nur die Hälfte der Keys ausprobieren (trotzdem noch 255 Möglichkeiten).\\
+
+
+Schlüssellänge: Der Erstvorschlag hatte 112 Bit Keys, die NSA wollte ihn auf 48 verkürzen, als Kompromiss hat man sich auf 56 Bit geeinigt.
+Per Brute-Force konnte man 1977 $2^{56}$ Schlüssel schwer knacken, heute ist diese Aufgabe problemlos:
+
+\begin{itemize}
+    \item ``Deep Crack'', 1998, \$250.000, 56 Stunden
+    \item COPACOBANA, 2006, \$10.000, unter 24 Stunden
+    \item \url{www.cloudcracker.com}, 2013, \$20, 21 Stunden
+    \item crack.sh, 2017, 26 Stunden
+\end{itemize}
+
+Variante zu Brute-Force: Klartextblock mit allen $2^{56}$ Schlüsseln verschlüsseln und speichern, dann in Übertragung diesen
+Klartextblock einschleusen und Ciphertext abfangen. \\
+
+Kryptoanalyse: 
+
+\begin{itemize}
+    \item Resistent gegen differentielle Krytanalyse, wenn alle 16 Runden verwendet
+    \item Weniger resistent gegen lineare Kryptanalyse, aber immer noch $2^{43}$ Klartexte nötig
+    \item Resistent gegen Related Key Kryptanalyse
+\end{itemize}
+
+Trotzdem: DES kann in seiner Urform heute nicht mehr als sicher angesehen werden!
