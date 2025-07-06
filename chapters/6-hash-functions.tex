@@ -155,16 +155,177 @@ Er erzeugt einen 160 Bit Output und basiert auf denselben Grundideen wie MD4 und
 \subparagraph{SHA-512/256} (allg. Sicherheit): Truncate-Versionen von SHA-512 mit kürzerer Ausgabelänge. Bietet eine Kombination aus höherer
 Sicherheit (wegen 1024-Bit Blockgröße) und kürzeren Hashes.
 
-\section{Merkle-Damgard}
-\section{SHA-3}
+
+\subparagraph{Merkle-Damgard}
+
+Die Merkle-Damg\r{a}rd-Konstruktion (auch Merkles Meta-Verfahren) ist eine Methode zur Konstruktion von kryptographischen Hash-Funktionen, die auf Arbeiten von 
+Ralph Merkle und Ivan Damg\r{a}rd zurückgeht.
+Gegeben ist eine kollisionsresistente Kompressionsfunktion $f: \{0, 1\}^{a+b} \to \{0, 1\}^b$. Durch die Anwendung der Merkle-Damg\r{a}rd-Konstruktion ergibt sich daraus 
+eine kollisionssichere Hash-Funktion $h: \{0, 1\}^* \to \{0, 1\}^b$, die beliebig lange Nachrichten auf einen Hashwert abbilden.
+
+\begin{figure}[h]
+    \includegraphics[width=0.9\textwidth]{figures/fig10-merkle-damgard}
+    \centering
+    \caption{Merkle-Damgard Hash}
+\end{figure}
+
+\begin{enumerate}
+    \item Padding (Auffüllen): Die Eingabenachricht wird so erweitert, dass ihre Länge ein Vielfaches der Blockgröße ist. Dabei wird meist die ursprüngliche 
+    Nachrichtenlänge am Ende angehängt.
+    \item Aufteilung in Blöcke: Die aufgefüllte Nachricht wird in gleichgroße Blöcke unterteilt.
+    \item Initialisierung: Ein fester Startwert (IV = Initialization Vector) wird gesetzt.
+    \item Iterative Verarbeitung: Für jeden Block wird die Kompressionsfunktion angewendet:
+    \begin{itemize}
+        \item Eingabe: der aktuelle Block + der Ausgabewert des vorherigen Schritts
+        \item Ausgabe: ein neuer Zwischenwert
+    \end{itemize}
+    \item Finales Ergebnis: Der Ausgabewert nach dem letzten Block ist der Hash-Wert.
+\end{enumerate}
+
+\subsection{SHA-3}
+
+
+2007 begann das NIST mit der Ausschreibung für einen Nachfolger von SHA-2. Am 2.10.2012 wurde Keccak (von Guido
+Bertoni, Joan Daemen, Gilles Van Assche und Michaël Peeters) als Sieger verkündet und stellt die Basis für SHA-3 dar.
+
+\begin{itemize}
+    \item Verwendet im Unterschied zur bisherigen SHA Familie eine sog. ``Sponge'' Konstruktion: ein 3-dimensionaler innerer Zustand ($5\times 5\times w$ -Bit Wörter; 
+    bei $w =64$ sind das 1.600 Bits)
+    \item Permutation: 24 Runden, 5 Schritte ($\theta, \rho, \pi, \chi, \iota$)
+    \item Zuerst wird der zu hashende Text zur Gänze ``aufgesogen'' (absorbing phase)
+    \item Danach der Hash gewünschter Länge ``ausgepresst'' (squeezing phase)
+    \item Das ergibt Hashlängen von 224 bis 512 Bit (theoretisch aber beliebig lange, bis maximal 1.600); wird auch als Capacity Wert bezeichnet
+\end{itemize}
+
+\paragraph{Phasen}
+
+\begin{figure}[h]
+    \includegraphics[width=0.75\textwidth]{figures/fig11-sponge}
+    \centering
+    \caption{SHA-3, Absorbing- und Squeezing Phase}
+\end{figure}
+
+\subparagraph{Absorbieren} Eingabedaten werden in Blöcke unterteilt.
+Jeder Block wird mit dem internen Zustand (einer Art Speicher) verXORt.
+Danach wird eine Permutation ($f$) auf den Zustand angewendet.
+
+\subparagraph{Auspressen} Nachdem alle Eingabeblöcke
+absorbiert wurden, wird ein Teil des internen Zustands als Ausgabe extrahiert.
+Bei langen Ausgaben (z.B. SHAKE-Funktionen) wird $f$ mehrfach ausgeführt, um mehr Output zu generieren.
+
+\paragraph{State} Der interne Zustand in KECCAK hat die Breite $b=1600$ Bits (für SHA-3). Dieser Zustand ist aufgeteilt in ein 3D-Array mit
+Dimensionen $5 \times 5 \times w$, wobei $w = 64$ bits. Jede Zelle $A[x][y]$ ist ein sogenanntes ``lane'' mit 64 Bits. 
+
+\paragraph{Parameter}
+
+Neben der Größe des States $b$, gibt es noch die Parameter
+
+\begin{itemize}
+    \item Rate $r$, wie viele Bits pro Sekunde verarbeitet werden können 
+    \item Capacity $c$, wie groß die Sicherheitsreserve ist, sie berechnet sich als $c = b - r$. Bei Kapazität $c$  bietet der Algorithmus $c/2$ Bit Widerstand gegen 
+    Kollisions- und Preimage-Attacken. 
+\end{itemize}
+
+Für den SHA-256 haben die Parameter $(b, r, c)$ dem Wert $(1600, 1088, 512)$.
+
+\paragraph{Permutationsfunktion} KECCAK-f hat 24 Runden mit je 5 Steps:
+\begin{enumerate}
+    \item $\theta$ (theta) mischt jede Lane mit einer XOR-Mischung ihrer Spaltennachbarn.
+    \item $\rho$ (rho) rotiert die Bits jeder Lane um einen bestimmten Wert.
+    \item $\pi$ (pi) permutiert die Positionen der Lanes im $5\times 5$-Gitter.
+    \item $\chi$ (chi) führt eine nichtlineare XOR-Maske aus, basierend auf anderen Werten in der Zeile.
+    \item $\iota$ (iota) fügt einen Rundenkonstanten hinzu (zum Schutz vor symmetrischen Mustern).
+\end{enumerate}
+
+\noindent Diese Schritte garantieren Diffusion, Konfusion und Nichtlinearität, wie bei modernen
+Blockchiffren.
+
+\paragraph{Padding} Um sicherzustellen, dass die Nachricht gleichmäßig in $r$-Bit-Blöcke aufgeteilt werden
+kann, ist ein Padding erforderlich. SHA-3 verwendet das Muster 100...001 (01 Padding), ein Bit mit Wert 1 wird gefolgt von null oder mehr 0-Bits (maximal $r-1$) und 
+einem letzten 1-Bit.
+
+\paragraph{XOFs} (Extendable Output Functions) basieren auf KECCAK und geben beliebig viele Ausgabebits zurück (nicht nur 256 oder 512).
+Sie sind sehr flexibel für Anwendungen wie:
+\begin{itemize}
+    \item Key Derivation Function (KDF)
+    \item Authentifizierung
+    \item PQC Signaturen (z. B. SPHINCS+, Dilithium)
+\end{itemize}
+
+SHAKE bezeichnet den KECCAK Algorithmus, der er ein anderes Padding (1111 statt 01) und eine variable Ausgabelänge hat.
+
+
 \section{Angriffe}
 
+Sei $n$ die Länge des Outputs. Die Angriffe auf Hashfunktionen können wie folgt kategorisiert werden:
 
-% \begin{itemize}
-% \end{itemize}
+\begin{itemize}
+    \item Angriff auf die Eigenschaft als Einwegfunktion: Idealerweise Komplexität von $O(2^n)$
+    \item Angriff auf die schwache Kollisionsresistenz: Idealerweise Komplexität von $O(2^n)$ 
+    \item Angriff auf die starke Kollisionsresistenz: Idealerweise Komplexität von $1.2\cdot 2^{n/2}$ (Geburtstagsparadoxon)
+\end{itemize}
 
-% \begin{enumerate}
-% \end{enumerate}
+Generell gilt, ein Aufwand von $2^{80}$ ist ``schwierig''.
 
-% \begin{align*}
-% \end{align*}
+\paragraph{MD5} ist gebrochen.
+\paragraph{SHA-1} ist gebrochen.
+\paragraph{SHA-2} 
+
+\begin{itemize}
+    \item Output: 224/256/384/512 Bit
+    \item Struktur: Merkle-Damgard
+    \item Theoretische Angriffe auf rundenreduzierte Versionen bekannt
+\end{itemize}
+
+\paragraph{SHA-3}
+
+\begin{itemize}
+    \item Output: 224/256/384/512 Bit
+    \item Struktur: Sponge
+\end{itemize}
+
+\subsection{BEAST Attack}
+
+Steht für \textbf{B}rowser \textbf{E}xploit \textbf{A}gainst \textbf{S}SL/\textbf{T}LS.
+\begin{itemize}
+    \item MitM Angriff und Chosen Plaintext Attack
+    \item Record Splitting
+    \item CBC Mode mit unsicherer IV-Generierung
+    \item Beschrieben in CVE-2011-3389
+    \item TLS1.0
+\end{itemize}
+
+Der BEAST-Angriff nutzt die Tatsache aus, dass bei TLS 1.0 der
+Initialisierungsvektor (IV) für die nächste Nachricht vorhersehbar ist:
+Er ist nämlich der letzte verschlüsselte Block der vorherigen Nachricht.
+
+Dadurch kann ein Angreifer über sogenannte Chosen-Plaintext-Angriffe (d. h. gezielt eingefügte Daten) Rückschlüsse auf vertrauliche
+Inhalte wie Cookies ziehen. \\
+
+\noindent Damalige temporäre Workarounds
+\begin{itemize}
+    \item RC4
+    \item 0-length Packets
+    \item 1/n-1 Packet-Splitting: 
+    \begin{itemize}
+        \item Erster Record (1 Byte): Enthält nur ein harmloses Byte (z. B. ein Leerzeichen oder ein kontrolliertes Zeichen).
+        \item Zweiter Record (n-1 Bytes): Enthält den Rest der eigentlichen Nachricht (z.B. HTTP-Headers, Cookies usw.).
+    \end{itemize}
+\end{itemize}
+ 
+
+\begin{figure}[h]
+    \includegraphics[width=0.9\textwidth]{figures/fig12-beast-attack-1}
+    \centering
+    \caption{How it should work: Proper encryption using a block cipher in CBC mode}
+\end{figure}
+\begin{figure}[h]
+    \includegraphics[width=0.9\textwidth]{figures/fig13-beast-attack-2}
+    \centering
+    \caption{The underlying vulnerability: A record splitting attack against TLS 1.0}
+\end{figure}
+\begin{figure}[h]
+    \includegraphics[width=0.9\textwidth]{figures/fig14-beast-attack-3}
+    \centering
+    \caption{The BEAST exploit: A chosen boundary attack combined with record splitting}
+\end{figure}
