@@ -1,0 +1,367 @@
+\chapter{Symmetrische Kryptographie}
+
+Bei symmetrischer Kryptographie verwenden Sender und Empfänger denselben Schlüssel, das heißt die Ver- und Entschlüsselung passieren symmetrisch.
+Bei Verschlüsselung gibt es zwei Arten:
+
+\paragraph{Blockcipher} Die Daten werden in Blöcke fixer Größe aufgeteilt und verschlüsselt. Das ist sinnvoll, wenn es keine zeitliche Komponente bei den Daten gibt, 
+und sie zum Zeitpunkt der Verschlüsselung bereits vollständig vorhanden sind. 
+
+\paragraph{Streamcipher} Die Daten werden verschlüsselt, sobald sie zu Verfügung stehen, und werden dann laufend mit dem Schlüsselstrom verknüpt. 
+Das erfordert Synchronisation zwischen Sender und Empfänger. Dieser Verschlüsselungsmodus ist für zeitkritische Anwendungen geeignet, bei denen man nicht warten kann, bis 
+ein kompletter Block an Daten vorhanden ist.
+
+Bei beiden Varianten ist die wichtigste Voraussetzung, den verwendeten Schlüssel sicher zu übertragen.
+
+\section{Blockchipher}
+
+\begin{definition}[Blockcipher]
+Ein Blockcipher mit einer Blocklänge von $n$ Bit ist eine invertierbare, üblicherweise deterministische Abbildung.
+
+Sei $V_n = \{0, 1\}^n$ die Menge aller $n$ Bit Vektoren und $\mathcal{K} = \{0, 1\}^k$ die Menge aller $k$ Bit Vektoren, dann sind
+
+$$E: V_n \times \mathcal{K} \to V_n \text{ und } D: V_n \times \mathcal{K} \to V_n$$
+
+mit $E(m, \kappa) = c$ für ein beliebiges $m \in V_n, \kappa \in \mathcal{K}$ und $D(c, \kappa) = m$ ein Blockcipher.
+\end{definition}
+
+Wir verwenden die Notation $E_K(p) = E(p, K)$ für die Verschlüsselung mit dem fixen Schlüssel $K \in \mathcal{K}$ und analog $D_K(C)$ für die Entschlüsselung. Dann gilt 
+für alle $P \in V_n$, dass $D_K(E_K(P)) = P$.
+
+Die Sicherheit, aber auch die Komplexität wird durch die Blocklänge beeinflusst, hier muss ein Tradeoff gemacht werden. Es gilt es die Blocklänge unter Berücksichtigung 
+der sicherheitstechnischen und performanten Anforderungen zu wählen. \\
+
+Die Auswahlkriterien für Blockcipher sind:
+
+\begin{itemize}
+    \item Geschätztes Sicherheitslevel: Je bekannter und erforschter ein Cipher ist, als desto sicherer wird er angesehen
+    \item Schlüsselgröße: Je höher die Entropie der Schlüsselt, desto höher ist die Sicherheit. Mit der Entropie steigt aber auch der Verarbeitungsaufwand.
+    \item Durchsatz: Der Durchsatz eines Ciphers ist abhängig von seiner Komplexität.
+    \item Blockgröße: Je größer die Blockgröße, desto höher die Sicherheit, aber auch die Komplexität.
+    \item Komplexität der kryptographischen Abbildung: Sie beeinflusst die Größe sowohl einer Software- als auch einer Hardwareimplementierung.
+    \item Datenexpansion: Gewisse Anwendungen erfordern, dass Daten vor und nach der Verschlüsselung dieselbe Größe haben.
+    \item Fehlerfortpflanzung: Ein fehlerhafter Ciphertext hat Auswirkungen auf Klartext, die konkrete Auswirkung unterscheidet sich je nach Betriebsmodus und Cipher.
+\end{itemize}
+
+\subsection{ECB (Electronic Codebook Mode)}
+
+Die Verschlüsselung von Plaintext Block $p_i$ ist
+
+\begin{align*}
+    c_i = E_K(p_i) \\
+    p_i = D_K(c_i)
+\end{align*}
+
+Die Vorteile des ECB sind: 
+
+\begin{itemize}
+    \item Wahlfreier Zugriff
+    \item Fehler in Ciphertext beeinflusst nur aktuellen Block
+    \item Wenn nur Nachrichten von bis zu einem Block übertragen werden, sicher und effizient
+\end{itemize}
+
+Die Nachteile sind:
+
+\begin{itemize}
+    \item Muster in Klartext im Ciphertext sichtbar
+    \item Selber Klartext ergibt bei selbem Schlüssel immer selben Ciphertext
+    \item Block Replay Attacken: beliebige Ciphertextblöcke können entfernt, eingefügt oder ersetzt werden
+\end{itemize}
+
+
+\subsection{CBC (Cipher Block Chaining)}
+
+Die Verschlüsselung von Plaintext Block $p_i$ ist
+
+\begin{align*}
+    c_i = E_K(p_i \oplus c_{i-1}) \\
+    p_i = c_{i-1} \oplus D_K(c_i)
+\end{align*}
+
+Die Vorteile des CBC sind: 
+
+\begin{itemize}
+    \item Gleiche Klartextblöcke ergeben nur dann gleiche Ciphertextblöcke, wenn vorhergehende Klartextblöcke identisch sind
+    \item Kein Block Replay mehr möglich
+    \item Auf Block Ebene selbstheilend
+\end{itemize}
+
+Die Nachteile sind:
+
+\begin{itemize}
+    \item Ent- und Verschlüsselung können nicht mehr wahlfrei erfolgen
+    \item Vor allem am Beginn oft gleiche Klartextblöcke, Lösung: zufälliger IV, braucht nicht geheim gehalten zu werden
+    \item Ein 1-Bit Fehler in Cipherblock $c_i$ bewirkt einen völlig fehlerhaften Klartextblock $p_i$ und einen 1-Bit Fehler in $p_{i+1}$ (``Error Extension'')
+    \item Einfügen beliebiger Blöcke am Ende bzw. gezielte Manipulation von Block $p_{i+1}$ möglich
+\end{itemize}
+
+\subsection{PCBC (Propagating Cipher Block Chaining)}
+
+Die Verschlüsselung von Plaintext Block $p_i$ ist
+
+\begin{align*}
+    c_i = E_K(p_i \oplus c_{i-1} \oplus p_{i-1}) \\
+    p_i = c_{i-1} \oplus p_{i-1} \oplus D_K(c_i)
+\end{align*}
+
+Die Vorteile des PCBC sind: 
+
+\begin{itemize}
+    \item Grundsätzlich gleiche Eigenschaften wie CBC
+    \item Zusätzlich: Fehler im Ciphertext bewirkt Fehler in allen folgenden Blöcken
+    \item Verwendet in Kerberos 4 zum Error-checking: wenn der letzte Block nicht dem erwarteten Wert entspricht, ist ein Fehler aufgetreten.
+\end{itemize}
+
+Die Nachteile sind:
+
+\begin{itemize}
+    \item Grundsätzlich gleiche Eigenschaften wie CBC
+    \item Vertauschen zweier Ciphertext Blöcke führt zu teilweiser falscher Entschlüsselung, wegen XOR fällt Fehler aber beim nächsten Block wieder heraus
+\end{itemize}
+
+\paragraph{Beispiel} Vertauschen zweier Blöcke:
+
+Wir berechnen den Ciphertext von der Nachricht $P = (P_1, P_2, P_3, P_4, P_5)$ und Initialisierungsvektor $IV$:
+
+\begin{align*}
+    C_1 &= E_K(P_1 \oplus IV) \\
+    C_2 &= E_K(P_2 \oplus C_1 \oplus P_1) \\
+    C_3 &= E_K(P_3 \oplus C_2 \oplus P_2) \\
+    C_4 &= E_K(P_4 \oplus C_3 \oplus P_3) \\
+    C_5 &= E_K(P_5 \oplus C_4 \oplus P_4) \\
+\end{align*}
+
+Und erhalten $C = (IV, C_1, C_2, C_3, C_4, C_5)$. Jetzt manipuliert ein Angreifer den Ciphertext und wir entschlüsseln statt $C$ den Text 
+$C'= (IV, C_1, C_\mathbf{3}, C_\mathbf{2}, C_4, C_5)$. Wir entschlüsseln:
+
+\begin{align*}
+    P_1 &= D_K(C_1) \oplus IV = (P_1 \oplus IV) \oplus IV = P_1 \\
+    P'_2 &= D_K(C_3) \oplus P_1 \oplus C_1 = (P_3 \oplus C_2 \oplus P_2) \oplus P_1 \oplus C_1 \\
+    P'_3 &= D_K(C_2) \oplus P'_2 \oplus C_3 = (P_2 \oplus C_1 \oplus P_1) \oplus P'_2 \oplus C_3 \\
+         &= (P_2 \oplus C_1 \oplus P_1) \oplus (P_3 \oplus C_2 \oplus P_2 \oplus P_1 \oplus C_1) \oplus C_3 = P_3 \oplus C_2 \oplus C_3\\
+    P_4 &= D_K(C_4) \oplus P'_3 \oplus C_2 = (P_4 \oplus C_3 \oplus P_3) \oplus (P_3 \oplus C_2 \oplus C_3) \oplus C_2 = P_4\\
+    P_5 &= D_K(C_5) \oplus P_4 \oplus C_4 = (P_5 \oplus C_4 \oplus P_4) \oplus P_4 \oplus C_4 = P_5
+\end{align*}
+
+Das heißt, aus dem Cipher $C' = (IV, C_1, C_3, C_2, C_4, C_5)$ ist der Plaintext 
+$P' = (P_1, P_3 \oplus C_2 \oplus P_2 \oplus P_1 \oplus C_1,  P_3 \oplus C_2 \oplus C_3, P_4, P_5)$ entstanden und nur die vertauschten Blöcke sind fehlerhaft.
+
+\subsection{XTS (oder XEX-TCB-CTS)}
+
+Für das Xor-Encrypt-Xor-based Tweaked CodeBook Mode with CipherText Stealing brauchen wir einen geteilten Schlüssel $K = K_1 || K_2$, ein Tweak $i$ mit einem dazugehörigen 
+$j$ (z.B. ist $i$ die Blocknummer auf der Harddisk unf $j$ der entsprechende Sektor) und ein $\alpha$, das ein primitives Element in $GF(2^{128})$ ist. 
+Es gilt für die Ver- und Entschlüsselung:
+
+\begin{align*}
+    c_j &= E_{K_1}\left(p_i \oplus (E_{K_2}(j) \oplus \alpha^i)\right) \oplus \left(E_{K_2}(j) \oplus \alpha^i\right) \\
+    p_j &= D_{K_1}\left(c_i \oplus (E_{K_2}(j) \oplus \alpha^i)\right) \oplus \left(E_{K_2}(j) \oplus \alpha^i\right)
+\end{align*}
+
+\begin{figure}[h]
+    \includegraphics[width=0.8\textwidth]{figures/fig2-XTS_mode_encryption}
+    \centering
+    \caption{Aorimn, \href{https://creativecommons.org/licenses/by-sa/4.0}{CC BY-SA 4.0}, via Wikimedia Commons}
+\end{figure}
+
+Die Vorteile sind 
+
+\begin{itemize}
+    \item deal für Datenverschlüsselung an Endpunkten (Festplattenverschlüsselung)
+    \item Ciphertext ist gleich lang wie Klartext
+\end{itemize}
+
+Die Nachteile sind
+
+\begin{itemize}
+    \item Schlüsselteilung ($K_1$ und $K_2$) potentiell unnötig und verkompliziert Vorgang
+    \item Kein Authentication Tag
+\end{itemize}
+
+\subsection{Exkurs: CTS (Cipher Text Stealing)}
+
+Grundproblem: wenn der letzte Klartextblock kleiner ist als die Blockgröße, muss dieser aufgefüllt werden. Damit wird aber der Ciphertext größer als der Klartext. \\
+
+Lösung: Sei $b$ die Blockgröße und $P = (P_1, \ldots, P_n)$ der Klartext.
+
+\begin{enumerate}
+    \item der letzte komplette Klartextblock $P_{-1}$ wird zu (Achtung) $C_\mathbf{n}$ verschlüsselt 
+    \item der letzte Klartextblock $P_n$ wird mit den letzten $l$ Bits von $C_n$ aufgefüllt
+    \item der neue letzter Block wird verschlüsselt, ergibt $C_\mathbf{n-1}$
+    \item Die ersten $b-l$ Bits von $C_n$ ergeben den neuen letzten Block
+\end{enumerate}
+
+% width=0.8\textwidth
+\begin{figure}[h]
+    \includegraphics[width=0.4\textwidth]{figures/fig3-CTS_ECB_Encryption}
+    \centering
+    \caption{Yaronf, \href{https://creativecommons.org/licenses/by-sa/4.0}{CC BY-SA 4.0}, via Wikimedia Commons}
+\end{figure}
+
+\subsection{Auswahl des Blockcipher Modus}
+
+Folgende Empfehlungen gibt es für die Auswahl der Blockcipher Modi:
+
+\begin{center}
+    \begin{tabular}{ ll } 
+        \hline
+        Anwendungsfall & Modus \\ 
+        \hline
+        Kurze, zufällige Daten & (ECB) GCM \\
+        Daten in der Übertragung & GCM \\
+        Gespeicherte, große Daten & XTS \\
+        \hline
+    \end{tabular}
+\end{center}
+
+Andere Modi sind, wenn möglich, zu vermeiden.
+
+\subsection{DES (Data Encryption Standard)}
+
+Das NBS, der Vorläufer des heutigen NIST, beschloss 1972 einen standardisierten Verschlüsselungsalgorithmus zu entwickeln. Die Anforderungen daran waren:
+
+\begin{itemize}
+    \item Hohes Sicherheitslevel
+    \item Leicht zu verstehen und lückenlos spezifiziert
+    \item Sicherheit liegt im Schlüssel, nicht im Algorithmus
+    \item Mit vertretbarem wirtschaftlichen Aufwand in elektronische Geräte integrierbar
+    \item ``Frei'' verfügbar
+    \item Anpassbar
+    \item Effizient
+    \item Validierbar
+    \item Exportierbar
+\end{itemize}
+
+Beim ersten Aufruf gab es keine (brauchbaren) Einsendungen, beim zweiten (1974) dann eine von IBM, Lucifer. Dieser wurde mit Hilfe der NSA evaluiert, verändert und 
+1975 veröffentlicht, ab 1976 Standard. DES wurde weitflächig übernommen, auch von Banken, Einzelhandel, Telekommunikation, etc.
+
+Laut heutiger Aussage war die Veröffentlichung der ``größter Fehler der NSA'' - sie war der Meinung, es ginge bei DES nur um Hardwareimplementierungen.
+Bis 1994 nur Hardware zertifiziert, keine Software. Ab 1983 wurde der Standard alle 5 Jahre reviewt:
+
+\begin{itemize}
+    \item 1983 problemlos
+    \item 1988 Einspruch der NSA, ``likely to be broken''
+    \begin{itemize}
+        \item Als Alternative COMSEC
+        \item Große Gegenwehr, Vorschlag abgelehnt
+        \item NSA stimmte dann doch Rezertifizierung zu, mit Bedingung ``nie wieder''
+    \end{itemize}
+    \item 1993 wieder zertifiziert
+    \item 1999 ebenso, mit Empfehlung, 3DES zu verwenden
+    \item 2004 Standard (FIPS 46-3) zurückgezogen
+\end{itemize}
+
+DES ist ein symmetrischer Blockcipher mit Blockgröße 64 Bit. Die Schlüsselgröße ist 64 Bit, aber effektiv nur 56, da jedes 8.Bit ein Prüfbit ist. \\
+
+Die Grundprinzipien ist Konfusion und Diffusion: Konfusion \index{Konfusion} heißt, die Beziehung zwischen Klartext, Schlüssel und Ciphertext soll so komplex wie möglich 
+sein.
+Diffusion \index{Diffusion} heißt, der Ciphertext hängt von so vielen Klartext Bits ab wie nur möglich.
+
+DES wird mittels Permutationen und Substitutionen realisiert, die 16 Mal (als ``Runden'') wiederholt werden. Diese Struktur eignet sich sehr gut für 
+Hardwareimplementierungen.
+
+\begin{enumerate}
+    \item Der 64-Bit Input wird initial permutiert.
+    \item Das Ergebnis vom letzten Schritt wird in zwei Hälften $L_0$ und $R_0$ gespalten
+    \item In einer Schleife wird 16 Mal ein Folgeergebnis berechnet: 
+    \begin{enumerate}
+        \item $L_i = R_{i-1}$
+        \item $R_i = L_{i-1} \oplus f(R_{i-1}, K_i)$
+    \end{enumerate}
+    \item Für das Endergebnis werden beide Hälften zusammengefügt und final permutiert, das Ergebnis hat wie der Input 64 Bit.
+\end{enumerate}
+
+Betrachten wir die einzelnen Schritte:
+
+\paragraph{Initiale und finale Permutation}
+
+Die finale Permutation ist invers zur initialen.
+Diese Permutation haben keinen Einfluss auf die Sicherheit, sondern wurden eingeführt um das Einlesen der Bytes in Hardware zu erleichtern. Bei Softwareimplementierungen 
+werden sie oft ausgelassen, weil sie dort schwer und mit vielen Bitoperationen implementiert werden müssten.
+
+\begin{figure}[h]
+    \includegraphics[width=0.8\textwidth]{figures/fig4-Permutation_initiale.png}
+    \centering
+    \caption{Initiale Permutation der 64 Bit, Quelle: Bourrichon, \href{https://creativecommons.org/licenses/by-sa/4.0}{CC BY-SA 4.0}, via Wikimedia Commons}
+\end{figure}
+
+\paragraph{Key Transformation}
+
+Bei der Key Transformation wird vom 64-Bit Key jedes 8. Bit verworfen. Die übrigen Bits werden in zwei Hälften zu je 28 Bit geteilt und in 16 Runden zirkulär nach links 
+geshiftet. Dabei wird fast immer um 2 Bit geshiftet, außer in Runden 1, 2, 9 und 16, wo nur um 1 Bit geshiftet wird.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|*{16}{c|}}
+\hline
+% Row 1 (cells 1-16)
+\cellcolor{red-1}1 & \cellcolor{red-1}2 & \cellcolor{red-1}3 & \cellcolor{red-1}4 & 
+\cellcolor{red-1}5 & \cellcolor{red-1}6 & \cellcolor{red-1}7 & \cellcolor{red-1}8 & 
+\cellcolor{yellow-1}9 & \cellcolor{yellow-1}10 & \cellcolor{yellow-1}11 & \cellcolor{yellow-1}12 & 
+\cellcolor{yellow-1}13 & \cellcolor{yellow-1}14 & \cellcolor{yellow-1}15 & \cellcolor{yellow-1}16 \\
+\hline
+% Row 2 (cells 17-32)
+\cellcolor{green-1}17 & \cellcolor{green-1}18 & \cellcolor{green-1}19 & \cellcolor{green-1}20 & 
+\cellcolor{green-1}21 & \cellcolor{green-1}22 & \cellcolor{green-1}23 & \cellcolor{green-1}24 & 
+\cellcolor{blue-1}25 & \cellcolor{blue-1}26 & \cellcolor{blue-1}27 & \cellcolor{blue-1}28 & 
+\cellcolor{blue-1}29 & \cellcolor{blue-1}30 & \cellcolor{blue-1}31 & \cellcolor{blue-1}32 \\
+\hline
+% Row 3 (cells 33-48)
+\cellcolor{orange-1}33 & \cellcolor{orange-1}34 & \cellcolor{orange-1}35 & \cellcolor{orange-1}36 & 
+\cellcolor{orange-1}37 & \cellcolor{orange-1}38 & \cellcolor{orange-1}39 & \cellcolor{orange-1}40 & 
+\cellcolor{purple-1}41 & \cellcolor{purple-1}42 & \cellcolor{purple-1}43 & \cellcolor{purple-1}44 & 
+\cellcolor{purple-1}45 & \cellcolor{purple-1}46 & \cellcolor{purple-1}47 & \cellcolor{purple-1}48 \\
+\hline
+% Row 4 (cells 49-64)
+\cellcolor{cyan-1}49 & \cellcolor{cyan-1}50 & \cellcolor{cyan-1}51 & \cellcolor{cyan-1}52 & 
+\cellcolor{cyan-1}53 & \cellcolor{cyan-1}54 & \cellcolor{cyan-1}55 & \cellcolor{cyan-1}56 & 
+\cellcolor{magenta-1}57 & \cellcolor{magenta-1}58 & \cellcolor{magenta-1}59 & \cellcolor{magenta-1}60 & 
+\cellcolor{magenta-1}61 & \cellcolor{magenta-1}62 & \cellcolor{magenta-1}63 & \cellcolor{magenta-1}64 \\
+\hline
+\end{tabular}
+\caption{Input Array für den Schlüssel mit 64 Bit}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+    \begin{tabular}{|*{7}{c|}}
+        \hline
+        \cellcolor{magenta-1}57 & \cellcolor{cyan-1}49 & \cellcolor{purple-1}41 & \cellcolor{orange-1}33 & 
+        \cellcolor{blue-1}25 & \cellcolor{green-1}17 & \cellcolor{yellow-1}9 \\
+
+        \hline
+        \cellcolor{red-1}1 & \cellcolor{magenta-1}58 & \cellcolor{cyan-1}50 & \cellcolor{purple-1}42 & 
+        \cellcolor{orange-1}34 & \cellcolor{blue-1}26 & \cellcolor{green-1}18 \\
+
+        \hline
+        \cellcolor{yellow-1}10 & \cellcolor{red-1}2 & \cellcolor{magenta-1}59 & \cellcolor{cyan-1}51 & 
+        \cellcolor{purple-1}43 & \cellcolor{orange-1}35 & \cellcolor{blue-1}27 \\
+
+        \hline
+        \cellcolor{green-1}19 & \cellcolor{yellow-1}11 & \cellcolor{red-1}3 & \cellcolor{magenta-1}60 & 
+        \cellcolor{cyan-1}52 & \cellcolor{purple-1}44 & \cellcolor{orange-1}36  \\
+        \hline
+    \end{tabular}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+    \begin{tabular}{|*{7}{c|}}
+        \hline
+        \cellcolor{magenta-1}63 & \cellcolor{cyan-1}55 & \cellcolor{purple-1}47 & \cellcolor{orange-1}39 & 
+        \cellcolor{blue-1}31 & \cellcolor{green-1}23 & \cellcolor{yellow-1}15 \\
+        
+        \hline
+        \cellcolor{red-1}7 & \cellcolor{magenta-1}62 & \cellcolor{cyan-1}54 & \cellcolor{purple-1}46 & 
+        \cellcolor{orange-1}38 & \cellcolor{blue-1}30 & \cellcolor{green-1}22 \\
+        
+        \hline
+        \cellcolor{yellow-1}14 & \cellcolor{red-1}6 & \cellcolor{magenta-1}61 & \cellcolor{cyan-1}53 & 
+        \cellcolor{purple-1}45 & \cellcolor{orange-1}37 & \cellcolor{blue-1}29 \\
+        
+        \hline
+        \cellcolor{green-1}21 & \cellcolor{yellow-1}13 & \cellcolor{red-1}5 & \cellcolor{blue-1}28 & 
+        \cellcolor{green-1}20 & \cellcolor{yellow-1}12 & \cellcolor{red-1}4  \\
+        \hline
+    \end{tabular}
+\end{minipage}
+\caption{Output Arrays mit den Schlüsseln $K_1$ und $K_2$}
+\end{table}
