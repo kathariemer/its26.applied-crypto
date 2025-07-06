@@ -1,0 +1,206 @@
+\chapter{Erzeugung von Primzahlen}
+
+Für public-key-Kryptosysteme benötigt man häufig zufällige große Primzahlen. In der Regel erzeugt man dazu eine natürliche Zahl in der gewünschten Größe und
+prüft, ob diese eine Primzahl ist, beispielsweise versucht man diese Zahl $n$ durch alle Primzahlen $\leq \sqrt{n}$ zu teilen, dieses Vorgehensweise ist jedoch sehr 
+ineffizient und heißt Probedivision\index{Probedivision}. Sie wird auch in Faktorisierungsalgorithmen mit Primzahlen bis $10^6$ verwendet.
+
+\paragraph{Verteilung der Primzahlen}
+
+Bezeichne $\pi(n)$ die Anzahl der Primzahlen im Intervall $[2, n]$. Es gilt 
+
+$$\pi(n) \sim \frac{n}{\ln(n)} $$
+
+
+\begin{center}
+    \begin{tabular}{ ll } 
+        \hline
+        $n$ & $\pi(n)$  \\ 
+        \hline
+                 10 &         4 \\
+                100 &        25 \\
+               1000 &       168 \\
+              10000 &      1229 \\
+             100000 &      9592 \\
+            1000000 &     78498 \\
+           10000000 &    664579 \\
+          100000000 &   5761455 \\
+         1000000000 &  50847534 \\
+        10000000000 & 455052512 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\paragraph{Abschätzung des Aufwands}
+
+Aus $\pi(n) \sim n / \ln(n)$ folgt: man benötigt wenigstens $\sqrt{n} / \ln(\sqrt{n})$ Probedivisionen, um zu
+beweisen, daß eine natürliche Zahl $n$ eine Primzahl ist.
+Beispielsweise werden bei RSA Primzahlen verwendet, die aktuell in der Regel größer als
+$10^{150}$ sind.\\
+
+Um nun die Primalität für diese Zahl zu beweisen, müßte man insgesamt mehr als
+$10^{150/2} / \ln(10^{150/2}) > 5.7 \cdot 10^{72}$ Probedivisionen durchführen -- das ist nicht durchführbar!
+Somit sucht man nach effizienteren Verfahren: Primzahltests\index{Primzahltest} stellen mit einer
+hohen Wahrscheinlichkeit fest, ob eine Zahl auch eine Primzahl ist (probabilistic primality
+tests).
+% Angewandte_Kryptographie_SoSe2025_part1_v01.pdf, Seite 34ff
+
+\section{Der Fermat Test}
+Der Fermat-Test
+- der Test beruht auf dem kleinen Satz von Fermat: Ist n eine Primzahl, so gilt 
+
+$$a^{n-1} \equiv 1  \mod n$$ 
+
+für alle $a \in \mathbb{Z}$ mit gcd($a,n$) = 1.
+
+Somit kann man mit diesem Satz überprüfen, ob eine Zahl zusammengesetzt ist:
+
+\begin{enumerate}
+    \item man wählt dazu eine natürliche Zahl $a \in \{1,2, \ldots, n-1\}$
+    \item als nächste berechnet man $r = a^{n-1} \mod n$
+    \item ist nun $r \neq 1$, so ist $n$ keine Primzahl und zusammengesetzt. Ergibt sich $r = 1$, so kann $n$ eine Primzahl oder zusammengesetzt sein
+    \item die Schritte 1 bis 3 müssen für alle Werte von $a$ nun durchlaufen werden, wenn $r = 1$
+\end{enumerate}
+
+Es braucht die Festlegung einer ``Sicherheits-Grenze'': Wie oft muss der Algorithmus bei $r = 1$ durchlaufen werden, damit man sicher sein kann, eine Primzahl gefunden 
+zu haben?\\
+    
+\noindent Der Fermat-Test kann zeigen, dass $n$ zusammengesetzt ist, er kann aber nicht beweisen, dass $n$ eine Primzahl ist. \\
+
+\noindent Das Verfahren ist zur Faktorisierung ungeeignet.
+
+\paragraph{Beispiel}
+Gegeben: $n = 341 = 11 \cdot 31$,  d.h. $n$ ist keine Primzahl. Wir berechnen für $a = 2$
+
+$$2^{340} \equiv 1 \mod 341,$$
+
+obwohl $n$ zusammengesetzt ist. Für ein anderen $a$, z.B. $a = 3$ haben wir 
+
+$$3^{340} \equiv 56 \mod 341.$$
+
+Im Ergebnis bedeutet das, dass 341 also eine zusammengesetzte Zahl ist und somit nicht prim sein kann.
+
+\section{Carmichael-Zahlen}
+
+Wenn der Fermat-Test für viele Basen $a$ keine Bestätigung für ein zusammengesetztes $n$
+gefunden hat, ist es wahrscheinlich, dass $n$ eine Primzahl ist.
+Es existieren aber natürliche Zahlen, deren Eigenschaft ist, dass sie zusammengesetzt sind,
+das jedoch nicht mit dem Fermat-Test gezeigt werden kann. \\
+
+Sei $n$ eine ungerade zusammengesetzte Zahl und es gilt für eine ganze Zahl $a$ folgende
+Kongruenz
+
+$$a^{n-1} \equiv 1 \mod n,$$
+
+so nennt man $n$ eine Pseudoprimzahl zur Basis $a$. Sei $n$ nun eine Pseudoprimzahl zur Basis $a$ für alle ganzen Zahlen $a$ mit gcd($a,n$) = 1. Dann
+heißt $n$ Carmichael-Zahl\index{Carmichael-Zahl}. 
+
+\paragraph{Beispiel} für eine Carmichael-Zahl: $561 = 3 \cdot 11 \cdot 17$.
+
+\paragraph{Eigenschaften} Eine ungerade zusammengesetzte Zahl $n \geq 3$ ist eine Carmichael-Zahl, wenn genau
+diese zwei Bedingungen gelten:
+\begin{enumerate}
+    \item $n$ ist quadratfrei, d.h. $n$ hat keinen mehrfachen Primteiler
+    \item $p - 1$ teilt $n - 1$ für alle Primteiler $p$ von $n$
+\end{enumerate}
+
+Somit folgt, dass jede Carmichael-Zahl ein Produkt von mindestens drei unterschiedlichen
+Primzahlen ist. Daher wissen wir auch, dass unendlich viele Carmichael-Zahlen existieren.
+
+\section{Der Miller-Rabin Test}
+
+Im Gegensatz zum Fermat-Test findet der Miller-Rabin-Test nach ``ausreichend'' vielen
+Durchläufen für jede natürliche Zahl heraus, ob diese zusammengesetzt ist. \\
+
+
+\noindent Sei $n$ eine natürliche ungerade Zahl mit $s = \max\{r \in \mathbb{N} | 2^r \text{ teilt } n-1\}$.
+Damit ist $2^s$ die größte Potenz, die $n-1$ teilt oder anders ausgedrückt: es gibt ein ungerades $d \in \mathbb{Z}$, sodass $n - 1 = 2^s \cdot d$.
+
+\begin{theorem}
+    Ist $n$ eine Primzahl und $a$ eine zu $n$ teilerfremde ganze Zahl, so gilt mit den
+obigen Bezeichnungen entweder
+    \begin{enumerate}
+        \item $a^d \equiv 1 \mod n$
+        \item$a^{2^r \cdot d} \equiv -1 \mod n$
+    \end{enumerate}
+\end{theorem}
+
+Mindestens eine der Bedingungen muss erfüllt sein, dass $n$ eine Primzahl ist. Weiters gilt, $n$ ist keine Primzahl (also zusammengesetzt) g.d.w. man eine ganze zu $n$ 
+teilerfremde Zahl $a$ findet, für die weder die Bedingung (1) noch (2) für ein $r \in \{0, 1, \ldots, s-1\}$ gilt.
+Dann wird $a$ Zeuge gegen die Primalität von $n$ genannt.
+
+\paragraph{Beispiel}
+Sei $n = 561$ und $a = 2$. Wir behaupten $a$ ist eine Zeuge gegen die Primalität von $n$:
+
+Wir berechnen $s = 4$ und wählen $d = 35$, dann gilt
+
+\begin{align*}
+    2^{35} &\equiv 263 \mod 561 \\
+    2^{2\cdot 35} &\equiv 166 \mod 561 \\ 
+    2^{4\cdot 35} &\equiv 67 \mod 561 \\
+    2^{8\cdot 35} &\equiv 1 \mod 561
+\end{align*}
+
+Also ist 561 keine Primzahl nach vorhergehenden Theorem.
+
+\paragraph{Abschätzung der Anzahl der Zeugen gegen eine Primalität einer Zahl $n$}
+
+\begin{theorem}
+Sei $n \geq 3$ eine ungerade zusammengesetzte Zahl, so gibt es in der Menge
+$\{1,2, \ldots, n-1\}$ höchstens $(n-1)/4$ Zahlen, die zu $n$ teilerfremd sind und keine Zeugen gegen die
+Primalität von $n$ sind.
+\end{theorem}
+
+Für einen Beweis: vgl. Buchmann J., Einführung in die Kryptographie, 3. Auflage, S. 127 ff.
+
+\paragraph{Beispiel}: Bestimmung aller Zeugen gegen eine Primalität der Zahl $n$.
+Sei $n = 15$, es ist $n-1 = 14 = 2 \cdot 7$, daraus folgt: $s = 1$ und $d = 7$. Eine zu 15 teilerfremde Zahl $a$ ist genau dann Zeuge gegen die Primzahleigenschaft
+von $n$ wenn $a^7 \mod 15 \neq \pm 1$ gilt.
+
+In einer tabellarischen Übersicht:
+
+
+\begin{center}
+    \begin{tabular}{ ccc ccc ccc } 
+        \hline
+        $a$ & 1 & 2 & 4 & 7 & 8 & 11 & 13 & 14 \\ 
+        \hline
+        $a^{14} \mod 15$ &  1 &  4 &  1 &  4 &  4 &  1 &  4 &  1 \\
+        $a^{ 7} \mod 15$ &  1 &  8 &  4 & 13 &  2 & 11 &  7 & 14 \\ 
+        \hline
+    \end{tabular}
+\end{center}
+
+Die Anzahl der zu 15 teilerfremden Zahlen in $\{1, 2,\dots,14\}$, die keine Zeugen gegen die
+Primalität von $n = 15$ sind, beläuft sich auf $2 \leq (15 - 1)/4 = 3.5$.
+
+\paragraph{Anwendung} des Miller-Rabin-Tests auf eine ungerade Zahl $n$
+
+\begin{itemize}
+    \item man wählt zufällig und gleichverteilt eine Zahl aus der Menge $\{2,3,\dots, n-1\}$
+    \item ist der gcd($a,n$) > 1, so ist $n$ zusammengesetzt
+    \item ist der gcd($a,n$) = 1, so testet man $a^d, a^{2d}, a^{2^2d}, \ldots, a^{2^{s-1}d}$
+    \item findet man nun einen Zeugen gegen die Primalität von $n$, dann wurde gezeigt, dass $n$ zusammengesetzt ist
+    \item die Wahrscheinlichkeit dafür, dass $n$ zusammengesetzt ist und man keinen Zeugen findet, beläuft sich nach obigen Theorem auf höchstens $0.25$.
+\end{itemize}
+
+Ist $n$ zusammengesetzt, so findet man bei der Iteration des Miller-Rabin-Tests mit $t$ Durchläufen mit einer Wahrscheinlichkeit von höchstens $frac14t$ keinen Zeugen 
+gegen die Primalität von $n$.
+
+\paragraph{Beispiel} nach 10 Durchläufen ergibt sich eine Wahrscheinlichkeit von $frac14 10$, das entspricht ungefähr einer $0.0001$-prozentigen Wahrscheinlichkeit, 
+dass man keinen Zeugen gegen die Primzahleigenschaft von $n$ findet.
+
+\section{Verfahren zur zufälligen Wahl von Primzahlen}
+
+Beim Verfahren für die Erzeugung einer zufälligen $k$-Bit-Primzahl: dabei wird zuerst eine zufällige und ungerade $k$-Bit-Zahl $n$ generiert.
+Davon wird das erste und letzte Bit wird auf 1 gesetzt, die restlichen $k-2$ Bits werden zufällig und gleichverteilt gesetzt. 
+Jetzt wird überprüft, ob $n$ eine Primzahl ist:
+\begin{itemize}
+    \item ist $n$ durch eine Primzahl unter einer gewissen Schranke $B$ (in der Regel wird $B = 10^6$ gesetzt) teilbar? Die Primzahlen werden in einer Tabelle vorgehalten.
+    \item wird dabei kein Teiler von $n$ gefunden, so wird der Miller-Rabin-Test mit $t$ Wiederholungen ( mit $t \geq 1$ als entsprechender Sicherheitsparameter) auf $n$ 
+    angewendet
+    \item wird dabei kein Zeuge gegen die Primzahleigenschaft von $n$ gefunden, so gilt $n$ nun als Primzahl (mit der Sicherheit $\frac{t}{4}$).
+    \item ansonsten muß der gesamte Test mit einer anderen Zahl $n'$ wiederholt werden
+\end{itemize}
+
+Die Auswahl der Schranke $B$ hängt von dem Verhältnis der Ausführungszeiten einer
+Probedivision und eines Miller-Rabin-Tests auf der verwendeten Hard- bzw. Software-Plattform ab.
