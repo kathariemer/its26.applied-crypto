@@ -157,7 +157,7 @@ Es gilt für die Ver- und Entschlüsselung:
 \end{align*}
 
 \begin{figure}[h]
-    \includegraphics[width=0.8\textwidth]{figures/fig2-XTS_mode_encryption}
+    \includegraphics[width=0.8\textwidth]{figures/fig02-XTS_mode_encryption}
     \centering
     \caption{Aorimn, \href{https://creativecommons.org/licenses/by-sa/4.0}{CC BY-SA 4.0}, via Wikimedia Commons}
 \end{figure}
@@ -191,7 +191,7 @@ Lösung: Sei $b$ die Blockgröße und $P = (P_1, \ldots, P_n)$ der Klartext.
 
 % width=0.8\textwidth
 \begin{figure}[h]
-    \includegraphics[width=0.4\textwidth]{figures/fig3-CTS_ECB_Encryption}
+    \includegraphics[width=0.4\textwidth]{figures/fig03-CTS_ECB_Encryption}
     \centering
     \caption{Yaronf, \href{https://creativecommons.org/licenses/by-sa/4.0}{CC BY-SA 4.0}, via Wikimedia Commons}
 \end{figure}
@@ -283,7 +283,7 @@ Diese Permutation haben keinen Einfluss auf die Sicherheit, sondern wurden einge
 werden sie oft ausgelassen, weil sie dort schwer und mit vielen Bitoperationen implementiert werden müssten.
 
 \begin{figure}[h]
-    \includegraphics[width=0.8\textwidth]{figures/fig4-Permutation_initiale.png}
+    \includegraphics[width=0.8\textwidth]{figures/fig04-Permutation_initiale.png}
     \centering
     \caption{Initiale Permutation der 64 Bit, Quelle: Bourrichon, \href{https://creativecommons.org/licenses/by-sa/4.0}{CC BY-SA 4.0}, via Wikimedia Commons}
 \end{figure}
@@ -582,7 +582,7 @@ Die Designkriterien der P-Boxen waren:
 \paragraph{DES Runden}
 
 \begin{figure}[h]
-    \includegraphics[width=0.8\textwidth]{figures/fig5-des-round.png}
+    \includegraphics[width=0.8\textwidth]{figures/fig05-des-round.png}
     \centering
     \caption{Eine Runde in DES, Bruce Schneier, Applied Cryptography, 2nd Edition, Fig. 12.2}
 \end{figure}
@@ -815,7 +815,7 @@ Die Unterschiede zwischen Rijndael und AES sind:
 \end{itemize}
 
 \begin{figure}[h]
-    \includegraphics[width=0.5\textwidth]{figures/fig6-aes}
+    \includegraphics[width=0.5\textwidth]{figures/fig06-aes}
     \centering
     \caption{AES}
 \end{figure}
@@ -1285,6 +1285,6 @@ Es werden 20 Runden (10 Double Rounds) einer Add-XOR-Rotation durchgeführt. Ein
         \verb|c += d; b ^= c; b <<< 7;|
 \end{minipage} \begin{minipage}[c]{0.48\textwidth}
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/fig7-chacha20-1024x576.png}
+    \includegraphics[width=0.9\textwidth]{figures/fig07-chacha20-1024x576.png}
 \end{minipage}
 
