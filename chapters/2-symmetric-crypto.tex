@@ -648,3 +648,75 @@ Kryptoanalyse:
 \end{itemize}
 
 Trotzdem: DES kann in seiner Urform heute nicht mehr als sicher angesehen werden!
+
+
+\section{Strengthening}
+
+\subsection{Mehrfache Verschlüsselung}
+
+Grundidee: Klartext mit demselben Algorithmus, aber unterschiedlichen Schlüsseln, mehrmals verschlüsseln (denselben Schlüssel zu verwenden bringt keinerlei Gewinn).
+
+\paragraph{Double Encryption}
+
+Die Ver- und Entschlüsselung dieses Blockalgorithmus ist:
+
+\begin{align*}
+    c = E_{K_2}\left( E_{K_1}(p) \right) \\
+    p = D_{K_1}\left( D_{K_2}(c) \right) \\
+\end{align*}
+
+Double Encryption ist nur sinnvoll, wenn der Blockalgorithmus keine algebraische Gruppe bildet (präziser: wenn er nicht abgeschlossen ist). Ansonsten gibt es immer ein 
+$K_3$, sodass $c = E_{K_2}\left( E_{K_1}(p) \right) = E_{K_3}(p)$.
+
+Eine naive Rechnung gibt uns die Erkenntnis, dass wir statt $2^n$ verschiedenen Schlüsseln nun $2^{2n}$ verschiedene Schlüssel haben.
+
+Problem: Meet-in-the-Middle Attack, diese benötigt nur $2^{n+1}$ Versuche:
+
+\begin{itemize}
+    \item Ist eine Known-Plaintext Attacke 
+    \item Der Angreifer kennt zwei Plaintext-Ciphertext Paare $(p_1, c_1)$ und $(p_2, c_2)$.
+    \item Angreifer berechnet und speichert $E_K(p_1)$ für jeden möglichen Schlüssel $K$
+    \item Danach berechnet er $D_K(c_1)$ für jedes $K$ und sucht diesen Wert unter den gespeicherten
+    \item Wenn gefunden: aktuelles $K$ ist sehr wahrscheinlich $K_2$, und $K$ für Wert in Speicher war $K_1$, nachprüfbar mit $(p_2, c_2)$.
+    \item Nicht praktikabel, aber weit besser als Brute-Force
+    \begin{itemize}
+        \item Meet-in-the-middle: $2\cdot 2^n = 2^{n+1}$ Verschlüsselungen, Speicheraufwand: $O(2^n)$
+        \item Brute Force: $2^{2n}$ Verschlüsselungen, Speicheraufwand: $O(1)$
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Triple Encryption}
+
+Die Ver- und Entschlüsselung dieses Blockalgorithmus ist ein Encryption-Decryption-Encryption Schema (EDE):
+
+\begin{align*}
+    c = E_{K_3}\left( D_{K_2} \left( E_{K_1}(p) \right) \right) \\
+    p = D_{K_1}\left( E_{K_2} \left( D_{K_3}(c) \right) \right) \\
+\end{align*}
+
+In DES wird das als Triple-DES verwendet.
+
+\begin{itemize}
+    \item 3 Optionen:
+    \begin{enumerate}
+        \item $K_1 \neq K_2 \neq K_3$
+        \item $K_1 = K_3$ und $K_1 \neq K_2$
+        \item $K_1 = K_2 = K_3$
+    \end{enumerate}
+    \item Option 1 ergibt einen 168(=$3\cdot 56$)Bit Key (effektiv aber nicht stärker als 112 Bit)
+    \item Option 2 ergibt 112-Bit Key, ist aber stärker als einfache Double Encryption (weil meet-in-the-middle jetzt einmal $K_1K_2$ raten muss)
+    \item Option 3 ist effektiv wieder DES, existiert nur aus Abwärtskompatibilität (was auch der Grund für das EDE Muster ist, ansonsten wäre z.B. EEE genauso anwendbar)
+    \item Beste Attacke ist wieder Variante von meet-in-the-middle, mit Komplexität $2^{2n}$ (und damit der Komplexität, die man bei Double Encryption hätte erwarten 
+    können)
+    \item Triple-DES wird aktuell noch bis 2023 zur Verwendung erlaubt
+    \item Auch andere Varianten möglich, z.B. Independent Subkeys, Key-dependent S-Boxes,\ldots
+\end{itemize}
+
+\subsection{Kaskadierung}
+
+Bei Kaskadierung werden unterschiedliche Algorithmen hintereinander angewendet. Wenn die einzelnen Schlüssel unabhängig sind, ist die Kaskade mindestens so schwer zu 
+brechen wie der erste Algorithmus in der Kaskade.
+
+\subsection{Whitening}
+
+Vor und nach der Verschlüsselung wird ein Teil des Schlüssels mit dem Input/Output verxort. Das verhindert, dass ein Angreifer Klartext/Geheimtext Paare bekommen kann.
