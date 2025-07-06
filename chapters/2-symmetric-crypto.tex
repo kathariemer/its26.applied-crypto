@@ -1096,19 +1096,125 @@ Blockciphers auf den erzeugten Schlüsselstrom übertragbar.
 
 \paragraph{CFB (Cipher Feedback Mode)}
 
-todo \verb|AK_03_stream_old.pdf| p5
+\begin{align*}
+    c_i = p_i \oplus E_K(c_{i-1}) \\
+    p_i = c_i \oplus E_K(c_{i-1})
+\end{align*}
+
+Vorteile: 
+\begin{itemize}
+    \item selbstsynchronisierend (self-synchronizing): wenn $n$ Bit gleichzeitig verschlüsselt werden, hängt der Keystream nur von den letzten $n$ Bit ab
+\end{itemize}
+
+Nachteile: 
+\begin{itemize}
+    \item 1 Bit Fehler im $i$-ten Ciphertext verursacht zuerst 1 Bit Fehler im $i$-ten Klartext, danach
+fehlerhaften folgenden $(i+1)$-ten Block
+    \item Angreifer kann beliebige Bits manipulieren. Der folgende Block lässt sich danach nicht
+mehr entschlüsseln, je nach Applikation kann das dem Angreifer aber genügen. 
+    \item Der letzte Block lässt sich völlig unbemerkt manipulieren
+    \item Wie im CBC Mode wird ein IV benötigt, dieser muss aber einzigartig sein, ansonsten
+entstehen gleiche Keystreams
+\end{itemize}
+
 
 \paragraph{OFB (Output Feedback Mode)}
 
-todo \verb|AK_03_stream_old.pdf| p6
+Sei $s_i = E_K(s_{i-1})$, dann
+
+\begin{align*}
+    c_i = p_i \oplus s_i  \\
+    p_i = c_i \oplus s_i
+\end{align*}
+
+Vorteile: 
+\begin{itemize}
+    \item $s_i$ ist unabhängig von Klar- und Ciphertext, d.h. Schlüsselstrom beliebiger Länge kann offline vorberechnet werden (synchronous)
+    \item 1 Bit Fehler im Ciphertext bewirkt nur 1 Bit Fehler im Klartext, keine Fehlerfortpflanzung
+\end{itemize}
+
+
+Nachteile: 
+\begin{itemize}
+    \item Synchronisation wichtig; sobald beide Schlüsselströme nicht mehr synchron laufen, keine Entschlüsselung mehr möglich
+    \item Insertion Attack möglich
+\end{itemize}
+
+\subparagraph{Insertion Attack}
+\begin{enumerate}
+    \item Angenommen, Angreifer kennt Ciphertextstream $c = (c_1, c_2, c_3, \ldots)$ 
+    \item Es gilt, $c$ entstand durch xor von Klartextstream $p$ und Schlüsselstream $k$ ($c_1 = p_1 \oplus k_1, \ldots$)
+    \item Angreifer fügt Bit $p_1'$ in $p$ ein (z.B. nach $p_1$) und schneidet neuen Cipherstream mit
+    \item Wenn derselbe Keystream verwendet wurde, dann gilt:
+    \begin{itemize}
+        \item $c_1 = p_1 \oplus k_1$
+        \item $c_2' = p_1' \oplus k_2$ 
+        \item $c_3' = p_2 \oplus k_3$
+        \item \ldots
+    \end{itemize}
+    \item Da Angreifer $p_1'$ kennt, kann er alle darauffolgenden Bits und in Folge den kompletten Keystream entschlüsseln:
+    \begin{itemize}
+        \item $k_2 = c_2' \oplus p_1'$
+        \item $p_2 = c_2 \oplus k_2$
+        \item $k_3 = c_3' \oplus p_2$
+        \item \ldots
+    \end{itemize}
+
+\end{enumerate}
 
 \paragraph{CTR (Counter Mode)}
 
-todo \verb|AK_03_stream_old.pdf| p7
+Sei $s_i = E_K(\text{Nonce}||i)$, dann 
+
+\begin{align*}
+    c_i = p_i \oplus s_i \\
+    p_i = c_i \oplus s_i
+\end{align*}
+
+Vorteile: 
+\begin{itemize}
+    \item $s_i$ kann parallel berechnet werden, kein Feedback nötig
+    \item Nonce $|| i$ muss Blocklänge haben (also z.B. 128-Bit bei AES)
+    \item Wahlfreier Zugriff
+    \item Sehr einfach
+\end{itemize}
+
+Nachteile: 
+\begin{itemize}
+    \item Bit Flipping möglich
+    \item Nonce und Zähler dürfen nicht mehrmals verwendet werden
+\end{itemize}
 
 \paragraph{GCM (Galois Counter Mode)}
 
-todo \verb|AK_03_stream_old.pdf| p8
+TODO
+
+\begin{align*}
+    y_0 &= IV||1 \\ 
+    H &= E_K(0) \\
+    GHASH(H,A,C) &= \bigoplus_i \left((A_i \bullet H^i ) \oplus \left(\bigoplus_j (C_{j+i} \bullet H^{j+i} )\right)\right)\ldots\\
+    T &= GHASH(H,A,C) \oplus E_K(y_0) \\
+\end{align*}
+
+und $si = E_K(y_{i-1}+1)$, dann ist die Definition der Ver- und Entschlüsselung
+
+\begin{align*}
+    c_i = p_i \oplus s_i \\
+    p_i = c_i \oplus s_i
+\end{align*}
+
+Vorteile: 
+\begin{itemize}
+    \item $s_i$ kann parallel berechnet werden, kein Feedback nötig
+    \item $T$ dient als Authentication Tag, authentifiziert den Ciphertext
+    \item $A$ sind Daten, die nur authentifiziert, nicht verschlüsselt werden
+    \item Sehr schnell in Hard- und Software
+\end{itemize}
+
+Nachteile: 
+\begin{itemize}
+    \item IV darf nur einmal verwendet werden
+\end{itemize}
 
 \subsection{Klassifikation}
 
