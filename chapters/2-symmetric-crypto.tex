@@ -720,3 +720,359 @@ brechen wie der erste Algorithmus in der Kaskade.
 \subsection{Whitening}
 
 Vor und nach der Verschlüsselung wird ein Teil des Schlüssels mit dem Input/Output verxort. Das verhindert, dass ein Angreifer Klartext/Geheimtext Paare bekommen kann.
+
+\section{AES (Advanced Encryption Standard)}
+
+Im Jänner 1997 wurde vom NIST ein Wettbewerb für einen DES Nachfolger ausgeschrieben.
+AES ist seit Mai 2002 offizieller Standard. Der ursprünglicher Aufruf war ``an unclassified, publicly disclosed encryption algorithm capable of protecting sensitive 
+government information well into the next century''.
+Im September 1997 wurden die Anforderungen spezifiziert:
+
+\begin{itemize}
+    \item The algorithm must implement symmetric (secret) key cryptography.
+    \item The algorithm must be a block cipher.
+    \item The candidate algorithm shall be capable of supporting key-block combinations with sizes of 128-128, 192-128, and 256-128 bits. A submitted algorithm may support 
+other key-block sizes and combinations, and such features will be taken into consideration during analysis and evaluation.
+\end{itemize}
+
+In der 1. Runde gab es 15 Einreichungen, von denen 5 in die nächste Runde kamen, nämlich 
+
+\begin{itemize}
+    \item MARS 
+    \item RC6
+    \item Rijndael 
+    \item Serpent 
+    \item Twofish
+\end{itemize}
+
+Der Sieger war Rijndael von Vincent \textbf{Rij}men und Joan \textbf{Dae}men. Bruce Schneier sagte 2000 über den Algorithmus 
+
+\say{I believe that within the next five years someone will
+discover an academic attack against Rijndael. I do not believe
+that anyone will ever discover an attack that will allow
+someone to read Rijndael traffic. So while I have serious
+academic reservations about Rijndael, I do not have any
+engineering reservations about Rijndael.}
+
+\subsection{Exkurs: Arithmetik in $GF(2^m)$}
+
+Wir betrachten die Arithmetik in binären Erweiterungskörpern.
+Bezeichne $GF(2^m)$ die Menge aller binären Polynomen mit Grad $< m$.
+
+\begin{itemize}
+    \item Berechnungen modulo irreduziblem Polynom von Grad m
+    \item m ist (z.B. bei elliptischen Kurven): (113), (131), 163, (176), 191, 193, 233, (239), (283), (409), 571
+    \item Elemente dargestellt als Integer
+    \begin{itemize}
+        \item $x^3+x^2+1$ ist Element von $GF(2^4)$, dargestellt als $1101$
+        \item für $GF(2^m)$ sind $m$ Bit notwendig
+        \item Elemente aus $GF(2^8)$ passen exakt in ein Byte
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Operationen}
+
+Sei $a(x) = x^3+x^2+x = 1110, b(x) = x^2+x+1 = 0111$ und $f(x) = x^4+x+1 = 10011$. Es gilt:
+
+\begin{itemize}
+    \item Addition/Subtraktion: Polynomaddition modulo 2, entspricht xor
+        $$a + b = x^3+1 (1110 xor 0111 = 1001)$$
+    \item Inversion bzgl. $f(x)$
+        $$b^{-1} = x^2+x$$
+    \item Multiplikation mod $f(x)$
+        $$a \cdot b = x^5+x^3+x \mod f(x) = x^3+x^2$$
+    \item Quadrierung mod $f(x)$ (einfache Spreizung)
+    $$ a^2 = x^6+x^4+x^2 \mod f(x) (11102 = 1010100) = x^3+x+1$$
+\end{itemize}
+
+\paragraph{Übung}
+
+Sei $a(x) = x^3 + x^2 + x, b(x) = x^2+x+1, c(x) = x^2+x$ und $f(x) = x^4+x+1$. Berechnen Sie
+
+\begin{enumerate}
+    \item $c + b$
+    \item $a + b + c$
+    \item $b - c$
+    \item $c^2 \mod f$
+    \item $b \cdot c \mod f$
+    \item $c^{-1} \mod f$
+\end{enumerate}
+
+\subsection{Verschlüsselung}
+
+Rijndael ist ein Blockcipher, die Block- und Schlüssellänge ist jedes Vielfache von 32 Bit zwischen inkl. 128 und inkl. 256 Bit.
+Es verwendet kein Feistelnetzwerk, für jede Operation muss eine inverse Operation definiert werden.
+
+Die Unterschiede zwischen Rijndael und AES sind:
+\begin{itemize}
+    \item AES Blocklänge ist immer 128 Bit
+    \item AES Schlüssellängen
+    \begin{itemize}
+        \item 128 Bit (10 Runden)
+        \item 192 Bit (12 Runden)
+        \item 256 Bit (14 Runden)
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[h]
+    \includegraphics[width=0.5\textwidth]{figures/fig6-aes}
+    \centering
+    \caption{AES}
+\end{figure}
+
+Sei $b$ die Blocklänge des Ciphers. AES operiert auf einem State:
+\begin{itemize}
+    \item 2-dimensionales Bytearray mit 4 Zeilen und $b/32$ Spalten
+    \item Sowohl Klartext als auch Schlüssel werden zu Beginn auf je ein solches Array gemappt
+    \item Beispiel: bei 128 Bit Blocklänge ergibt sich ein $4 \times 4$ Array
+\end{itemize}
+
+\paragraph{Sub-Bytes} ist die einzige nicht-lineare Operation in AES. (? Todo: \verb|folien AK_02_block_v02.pdf|, Seite 65)
+
+\begin{itemize}
+    \item Konfusion
+    \item S-Box 
+    \item Die einzelnen Bytes werden als Elemente von $GF(2^8)$ betrachtet
+    \item Irreduzibles Polynom ist $x^8 + x^4 + x^3 + x + 1$
+    \item Jedes Byte $a_{i,j}$ wird transformiert zu $b_{i,j} = Sbox(a_{i, j}) = f(g(a_{i,j}))$ mittels 
+    \begin{itemize}
+        \item $g: a \mapsto a' = a^{-1}$
+        \item $f: a' \mapsto b = A\cdot a' + v$
+    \end{itemize}
+    \item Affine Transformation mit $v$ um Attacken zu Vermeiden. 
+\end{itemize}
+
+\begin{equation*}
+    A = \begin{pmatrix}
+        1 & 1 & 1 & 1 & 1 & 0 & 0 & 0\\
+        0 & 1 & 1 & 1 & 1 & 1 & 0 & 0\\
+        0 & 0 & 1 & 1 & 1 & 1 & 1 & 0\\
+        0 & 0 & 0 & 1 & 1 & 1 & 1 & 1\\
+        1 & 0 & 0 & 0 & 1 & 1 & 1 & 1\\
+        1 & 1 & 0 & 0 & 0 & 1 & 1 & 1\\
+        1 & 1 & 1 & 0 & 0 & 0 & 1 & 1\\
+        1 & 1 & 1 & 1 & 0 & 0 & 0 & 1\\
+\end{pmatrix} \text{ und } v = (0,1,1,0,0,0,1,1)^\top
+\end{equation*}
+
+\paragraph{ShiftRows}
+
+Diffusion:
+\begin{itemize}
+    \item Jede Zeile des States wird zyklisch nach links geshiftet
+    \item Offsets: 0,1,2,3 für 128 Bit Blocklänge
+    \item Mit diesen Offsets maximale Diffusion und größte Resistenz gegen bekannte Attacken
+\end{itemize}
+
+(todo: add graphic)
+
+\paragraph{MixColumns}
+
+Diffusion
+\begin{itemize}
+    \item Arbeitet auf den Spalten des States (wegen 32-Bit Architektur sind 4 Zeilen, d.h. 32 Bit pro Spalte optimal)
+    \item Bytes einer Spalte werden Koeffizienten eines Polynoms vom Grad 3 in $GF(2^8)$ betrachtet
+    \begin{itemize}
+        \item Spalte wird multipliziert mit $03x^3 + 01x^2 + 01x + 02$
+        \item Multiplikation mit 01 ist die Identität 
+        \item Multiplikation mit 02 ist ein Shift und ein XOR 
+        \item Multiplikation mit 03 ist eine Multiplikation mit 02 und ein XOR 
+        \item Reduziert mit $x^4 + 1$ 
+    \end{itemize}
+\end{itemize}
+
+De facto handelt es sich also um ein Polynom in $x$, dessen Koeffizienten Polynome sind. Herleitung daher allgemein einfacher.
+Notation: statt $a_{i,j}$ steht im Folgenden $a_i$, zur Wahrung der Übersichtlichkeit. \\
+
+Beispiel: Stelle 
+
+\begin{align*}
+    (02a_3+a_2+a_1+03a_0)&x^3 + \\
+    (03a_3+02a_2+a_1+a_0)&x^2 + \\
+    (a_3+03a_2+02a_1+a_0)&x^1 + \\ 
+    (a_3+a_2+03a_1+02a_0)& 
+\end{align*}
+    
+    als Matrix dar:
+
+\begin{equation*}
+    \begin{pmatrix}
+        b_0 \\ b_1 \\ b_2 \\ b_3 \\
+\end{pmatrix}  = \begin{pmatrix}
+        02 & 03 & 01 & 01 \\
+        01 & 02 & 03 & 01 \\
+        01 & 01 & 02 & 03 \\
+        03 & 01 & 01 & 02 \\
+\end{pmatrix} \cdot \begin{pmatrix}
+        a_0 \\ a_1 \\ a_2 \\ a_3 \\
+\end{pmatrix} 
+\end{equation*}
+
+\paragraph{AddRoundKey}
+
+Aktueller Rundenschlüssel wird byteweise mit aktuellem State verxort
+
+\paragraph{Key Schedule}
+
+Aus initialem 128-bit (bzw. 192 bzw. 256-bit) Key muss für jede
+Runde ein Schlüssel in Blocklänge (128 Bit) generiert werden. Seo $b$ die Blocklänge und $r$ die Rundenanzahl.
+Die zwei Schritte dafür sind:
+
+\begin{enumerate}
+    \item Key Expansion: wie wird aus initialem Schlüssel ein Schlüssel der Länge $(r + 1) \cdot b$ Bit
+    \item Round Key Selection: wie wird Schlüsselteil für aktuelle Runde ausgewählt
+\end{enumerate}
+
+
+\begin{itemize}
+    \item Schlüssel wird in 2-dimensionales Array geschrieben
+    \item Die letzte Spalte des Arrays wird einmal zirkulär nach oben geshiftet
+    \item Danach mittels S-Box aus SubBytes behandelt
+    \item Dann mit Rundenkonstante verxort
+    \begin{itemize}
+        \item Runde 1: 0x01 (1, 01)
+        \item Runde 2: 0x02 (x, 10)
+        \item Runde 3: 0x04 (x2, 100)
+        \item Runde 4: 0x08 (x3, 1000)
+        \item Runde 5: 0x10 (x4, 1 0000)
+        \item Runde 6: 0x20 (x5, 10 0000)
+        \item Runde 7: 0x40 (x6, 100 0000)
+        \item Runde 8: 0x80 (x7, 1000 0000)
+        \item Runde 9: 0x1b (x8 mod (x8 + x4 + x3 + x + 1), 1 1011)
+        \item Runde 10: 0x36 (x9 mod (x8 + x4 + x3 + x + 1), 11 0110)
+    \end{itemize}
+    \item Schließlich mit erster Spalte des letzten Rundenschlüssels verxort, ergibt erste Spalte des aktuellen Rundenschlüssels
+    \item Übrige Spalten entstehen durch verxoren der vorherigen Spalte mit der entsprechenden Spalte des letzten Rundenschlüssels
+(Spalte 2 des neuen Schlüssels ist also Spalte 1 des neuen verxort mit Spalte 2 des alten) 
+\end{itemize}
+
+\subsection{Entschlüsselung}
+
+Für die Entschlüsselung brauchen wir für jede Funktion der Verschlüsselung ein Inverses:
+
+\begin{center}
+    \begin{tabular}{ ll } 
+        \hline
+        Verschlüsselung & Entschlüsselung \\ 
+        \hline
+        SubBytes & InvSubBytes \\
+        ShiftRows & InvShiftRows \\
+        MixColumns & InvMixColumns \\
+        AddRoundKey & AddRoundKey (selbstinvers) \\
+        \hline
+    \end{tabular}
+\end{center}
+
+Weiters, muss die Reihenfolge der Operationen umgekehrt werden.
+Möglichkeit einer mathematisch äquivalenten Beschreibung, um die Reihenfolge beizubehalten:
+
+\begin{itemize}
+    \item InvSubBytes und InvShiftRows können vertauscht werden, es ist völlig egal, ob Werte zuerst ersetzt und dann verschoben werden, oder umgekehrt
+    \item InvMixColumns und AddRoundKey können vertauscht werden, weil InvMixColumns linear ist, d.h. $F(a\oplus b) = F(a) \oplus F(b)$
+\end{itemize}
+
+\noindent Damit ist wenn EquivRoundKey := InvMixColumns(RoundKey):
+
+$$\text{InvMixColumns}(\text{State} \oplus \text{Roundkey}) = \text{InvMixColumns}(\text{State}) \oplus \text{EquivRoundKey}.$$ 
+
+\paragraph{Beispiel} für 3 Runden:
+
+\begin{center}
+    \begin{tabular}{ lll } 
+        \hline
+        Verschlüsselung & $>$ Entschlüsselung & $>$ Entschlüsselung optimiert\\ 
+        \hline
+        AddRoundKey & AddRoundKey   & AddRoundKey \\
+        SubBytes    & InvShiftRows  & InvSubBytes \\
+        ShiftRows   & InvSubBytes   & InvShiftRows \\ 
+        MixColumns  & AddRoundKey   & InvMixColumns \\
+        AddRoundKey & InvMixColumns & EquivRoundKey \\
+        SubBytes    & InvShiftRows  & InvSubBytes \\
+        ShiftRows   & InvSubBytes   & InvShiftRows \\
+        MixColumns  & AddRoundKey   & InvMixColumns \\
+        AddRoundKey & InvMixColumns & EquivRoundKey \\
+        SubBytes    & InvShiftRows  & InvSubBytes \\
+        ShiftRows   & InvSubBytes   & InvShiftRows \\
+        AddRoundKey & AddRoundKey   & AddRoundKey \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\subsection{Zusammenfassung}
+
+\paragraph{Effizienz}
+
+\begin{itemize}
+    \item Sämtliche Berechnungen können vorab als Lookup-Tables gespeichert werden
+    \item SubBytes, ShiftRows und MixColumns können in einer Operation zusammengefasst werden
+    \item Sowohl in Hardware als auch in Software schnell implementierbar
+    \item Von 8-bit bis 128-bit Architekturen
+    \item Intel mit eigenen Instruction Set Extensions für AES (z.B. \verb|AESENC|, \verb|AESENCLAST|, \verb|AESDEC|, \ldots)
+\end{itemize}
+
+\paragraph{Designentscheidungen}
+
+\begin{itemize}
+    \item Anzahl der Runden
+    \begin{itemize}
+        \item Volle Diffusion nach 2 Runden (mit Feistelnetzwerk nicht erreichbar)
+        \item Änderung in einem State Bit beeinflusst ungefähr die Hälfte aller State Bits nach 2 Runden
+        \item Keine Attacken für Versionen ab 6 Runden gefunden
+        \item 4 Runden Security Margin hinzugefügt, damit also quasi je einmal volle Diffusion am Anfang und am Ende hinzugefügt
+        \item Für je 32 Bit Schlüssellänge wird eine Runde hinzugefügt
+        \item Für je 32 Bit Blocklänge wird eine Runde hinzugefügt (betrifft nur Rijndael)
+    \end{itemize}
+    \item SubBytes
+    \begin{itemize}
+        \item ist nicht-linear, erreicht durch Inversion in endlichem Körper
+        \item Algebraisch Komplex, erreicht durch affine Transformation
+    \end{itemize}
+    \item ShiftRows
+    \begin{itemize}
+        \item Maximale Diffusion (4 unterschiedliche Offsets)
+        \item Einfachste Variante bei mehreren gleichwertigen gewählt
+    \end{itemize}
+    \item MixColumns
+    \begin{itemize}
+        \item 4-Byte Spalten, um 32-Bit Architektur auszunützen
+        \item Linear in $GF(2)$
+        \item Diffusion, nicht zwangsläufig optimale
+        \item Auch auf 8-Bit Architekturen gute Performance
+    \end{itemize}
+    \item KeyAddition und Key Schedule
+    \begin{itemize}
+        \item Durch Addition des Keys am Anfang und am Ende (siehe Whitening)
+        \item Möglichst wenig Arbeitsspeicher für KeyExpansion durch rekursive Definition
+        \item Symmetrien eliminiert durch Addition der Rundenkonstanten
+        \item Diffusion
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Kritik und Angriffe}
+
+Es gibt zwei große Kritikpunkte bzgl. AES: 
+
+\begin{itemize}
+    \item Einfachheit
+    \begin{itemize}
+        \item Großteil ist algebraisch zu beschreiben
+        \item Ungewöhnlich für Blockcipher
+    \end{itemize}
+    \item Key Schedule 
+    \begin{itemize}
+        \item Attacken für 256 Bit Keys bekannt
+    \end{itemize}
+\end{itemize}
+
+Die momentan besten Angriffe sind:
+
+\begin{itemize}
+    \item Auf AES-256, 14 Runden, in $O(2^{99.5})$
+    \item Auf AES-192, 12 Runden, in $O(2^{176})$
+    \item Auf AES-128, 10 Runden, in $O(2^{126.1})$
+\end{itemize}
+
+
+
+% \begin{itemize}
+% \end{itemize}
