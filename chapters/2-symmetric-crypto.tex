@@ -1073,6 +1073,59 @@ Die momentan besten Angriffe sind:
 \end{itemize}
 
 
+\section{Streamchipher}
 
+Im Gegensatz zu Blockciphern werden hier Daten verschlüsselt, sobald sie zur
+Verfügung stehen. Das wird überall dort gebraucht, wo Latenzen ein Problem bereiten.\\ 
+
+Streamciphers sind üblicherweise sehr effizient in Hardware implementierbar. \\
+
+Datenstrom wird mit einem Schlüsselstrom verknüpft (üblicherweise per xor)m dafür muss der Schlüsselstrom gleich lang sein wie die Daten.
+Im Idealfall ist der Schlüsselstrom eine komplette Zufallsfolge (siehe One-Time Pad). \\
+
+Bei Streamciphern sind Konfusion und Diffusion nicht möglich. Das heißt die Sicherheit liegt allein in der Qualität des Schlüsselstroms. \\
+
+Streamcipher werden sehr oft gerade in der Telekommunikationsbranche verwendet,
+allerdings gibt es sehr wenige Spezifikationen die öffentlich oder standardisiert sind. Eine Initiative, die versucht eine Standardisierung zu erreichen war z.B. das
+eSTREAM Projekt der EU. \\
+
+Durch geeigneten Betriebsmodus kann beliebiger Blockcipher zu Streamcipher umgebaut werden. Damit sind grundsätzlich alle positiven, untersuchten Eigenschaften des
+Blockciphers auf den erzeugten Schlüsselstrom übertragbar.
+
+\subsection{Streamchipher Modi}
+
+\paragraph{CFB (Cipher Feedback Mode)}
+
+todo \verb|AK_03_stream_old.pdf| p5
+
+\paragraph{OFB (Output Feedback Mode)}
+
+todo \verb|AK_03_stream_old.pdf| p6
+
+\paragraph{CTR (Counter Mode)}
+
+todo \verb|AK_03_stream_old.pdf| p7
+
+\paragraph{GCM (Galois Counter Mode)}
+
+todo \verb|AK_03_stream_old.pdf| p8
+
+\subsection{Klassifikation}
+
+\paragraph{One-Time Pad}
+
+Ein One-Time Pad ist unconditionally secure. Hierbei ist der Schlüssel genauso lang wie die Nachricht und absolut zufällig.
+
+\paragraph{Synchron}
+
+Ein Keystream wird unabhängig von der Nachricht erzeugt und hängt nur vom initialen Schlüssel und dem aktuellen internen Zustand des Ciphers ab (z.b. OFB).
+Der Sender und Empfänger müssen daher stets im selben internen Zustand sein, d.h. eine externe Synchronisation ist notwendig.
+Bei dieser Art gibt es keine Fehlerfortpflanzung.
+
+\paragraph{Asynchron (selbstsynchronisierend)}
+
+Der Keystream ist eine Funktion des Schlüssels und der letzten $n$ Ciphertext Zeichen (z.B. CFB).
+Bei fehlenden/eingefügten Zeichen pflanzt sich der Fehler nur über $n$ Zeichen fort,
+danach synchronisiert sich der Empfänger von selbst wieder.
 % \begin{itemize}
 % \end{itemize}
