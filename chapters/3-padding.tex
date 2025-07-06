@@ -92,8 +92,59 @@ Dann wird der letzte Block $P_n$ mit $C'$ gepadded und verschlüsselt. Dieser ko
 verwendete Teil $C_n$ wird angehängt. So kann die Nachricht mit Block Ciphern verschlüsselt werden, ohne sie zu verlängern.
 
 \section{Hash Funktionen}
+
+\paragraph{MD5 und SHA-1} Hier muss die Nachricht um 64 Bits kleiner sein als ein Vielfaches von 512.
+Das Padding ist eine 1 und entsprechend vielen 0 auf die benötigte Länge. Danach werden 64 Bit mit der Länge der ungepaddeten Nachricht angehängt, das erzeugt eine 
+Nachricht mit einer durch 512 teilbaren Länge. \\
+
+\noindent Diese Methode vermeidet, dass gleich beginnende und mit 0 endende Nachrichten denselben
+Hashwert haben. Ohne das Einfügen der 1 vor dem Padding (und ohne angefügte Länge)
+würden \verb|foo| und \verb|foo00| bzw. \verb|foo100| denselben Hash ergeben.
+
 \section{Byteweise}
+
+\paragraph{ANSI X.923} Mit 0x00 Bytes gepaddet, letztes Byte gibt Anzahl der Padding Bytes an
+
+\paragraph{ISO 10126} Mit zufälligen Bytes gepaddet, letztes Byte gibt Anzahl der Padding Bytes
+an (mittlerweile zurückgezogen)
+
+\paragraph{ISO 7816} (ISO 9797) Ein fixes Byte markiert Beginn des
+Paddings, danach mit 0x00 aufgefüllt. Im Wesentlichen bei Smartcards
+verwendet.
+
+\paragraph{PKCS5/7} (RFC3852) Letzter Block gepaddet mit $n$ Bytes, alle mit Wert $n$. Mögliche Varianten sind also
+\begin{itemize}
+    \item \verb|0x01|
+    \item \verb|0x02 0x02|
+    \item \verb|0x03 0x03 0x03|
+    \item \ldots
+\end{itemize}
+
+\paragraph{Zero Padding} Mit 0x00 aufgefüllt, ist nicht reversibel
+
 \section{RSA}
+
+Zu kurze Nachrichten problematisch zu verschlüsseln. Ursprünglich wurde einfach mit Zufallsdaten auf bestimmte Länge aufgefüllt
+Im ersten Public-Key Cryptography Standards (PKCS) < v2.0:
+\begin{itemize}
+    \item v1.5 = RFC 2313
+    \item EM = 0x00||BT||PS||0x00||M
+    \item BT (Block Type) ist
+    \begin{itemize}
+        \item 0x00 oder 0x01 für Private Key Operationen (signieren)
+        \item 0x02 für Public Key Operationen (verschlüsseln)
+    \end{itemize}
+    \item PS (Padding String) ist ($k$ - Länge von $M$ - 3) Bytes lang, mindestens aber 8
+    \begin{itemize}
+        \item k = Länge des Modulus in Byte
+        \item PS ist 0x00 für BT = 0x00, 0xFF für BT = 0x01 und zufällig für BT = 0x02
+    \end{itemize}
+    \item Problem: nicht übermäßig zufällig, Struktur der Klartextnachricht erratbar
+    \item Bleichenbacher Angriff (\url{https://web.archive.org/web/20120204040056/}, \url{http://www.bell-labs.com/user/bleichen/papers/pkcs.ps})
+\end{itemize}
+
+Mittlerweile ist üblicherweise Optimal Asymmetric Encryption Padding (OAEP), eingeführt in PKCS\#1 v2.0
+
 \section{OAEP}
 
 
