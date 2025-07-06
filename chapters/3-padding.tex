@@ -1,0 +1,107 @@
+\chapter{Padding}
+
+Bei allen Algorithmen, die Nachrichten in festen Blöcken verarbeiten, muss die Nachrichtenlänge
+ein Vielfaches der Blocklänge sein. Das gilt z.B. bei Blockciphern, aber auch bei Hashfunktionen etc. \\
+
+\noindent Manchmal hilft Padding auch bei der Verschleierung des tatsächlichen Inhalts bei deterministischen Verfahren wie z.B. RSA oder klassische Cipher. \\
+
+\noindent Deswegen versuchen wir, unsere Nachrichten in einer passenden Form aufzufüllen. Entweder weiß der Empfänger über das Padding Bescheid, oder er kann es - je nach konkreter 
+Anwendung ignorieren. Es ist aber zu beachten, dass das Padding sich klar von der Nachricht untescheidet. Ein Negativbeispiel ist das Padding mit zufälligen Wörtern und 
+Sätzen, wie bei der Geschichte aus dem zweiten Weltkrieg: \url{https://en.wikipedia.org/wiki/The_world_wonders}. \\
+
+\noindent Es gilt zwar, dass ein Padding eine Nachricht immer verlängert, wir versuchen diese aber auf weniger als eine Blockgröße zu beschränken.
+
+\section{Block cipher mode of operation}
+
+Bei einem einfachen Padding, könnte der letzte Block mit einem regulären Bitmuster aufgefüllt werden:
+
+\begin{itemize}
+    \item nur 0er bzw. nur 1er
+    \item abwechselnd 0 und 1
+    \item so, dass der Empfänger das Padding entfernen kann
+    \begin{itemize}
+        \item z.B. lauter 0er und am Ende ein Byte, das angibt, wie viele Bytes entfernt werden sollen (z.B. \ldots, \verb|0x12, 0x15, 0x0, 0x0, 0x2|)
+        \item dann muss aber jede Nachricht gepadded werden
+        \item im schlimmsten Fall, muss ein gesamter Block angefügt werden
+    \end{itemize}
+\end{itemize}
+
+Bei CBC gibt es folgendes Schema:
+
+\begin{enumerate}
+    \item Der letzte vollständige Block wird nochmals verschlüsselt
+    \item Die linkesten $l$ Bit des neuen Ciphertext Blocks werden mit dem $l$-bit langen Klartextrest verxort
+    \item Problem: Angreifer kann durch Manipulation des Ciphertextes gezielt Bits im letzten Klartextblock verändern
+\end{enumerate}
+
+\paragraph{Ciphertext stealing}
+
+\begin{center}
+    \begin{tikzpicture}[node distance=1cm and 1.5cm, every node/.style={align=center}]
+      % Encryption Title
+      \node (title1) [font=\large] at (-5,5) {Encryption};
+
+      % Encryption - Left side
+      \node (pn1) [draw, minimum width=2cm, minimum height=1cm] at (-6.5,4) {$P_{n-1}$};
+      \node (ek1) [draw, minimum width=2cm, minimum height=2cm] at (-6.5, 2) {$E_k$};
+      \node (cdash1) at (-5.9, 0) {$C'$};
+      \node (cn1) at (-7.1, 0) {$C_n$};
+      \node (auxc1) [draw, minimum width=2cm, minimum height=1cm] at (-6.5, 0) {};
+      \draw (-6.6, 0.5) -- (-6.6, -0.5);
+      \draw[->] (pn1) -- (ek1);
+      \draw[->] (ek1) -- (auxc1);
+
+      % Encryption - Right side
+      \node (auxp1) [draw, minimum width=2cm, minimum height=1cm] at (-3.5, 4) {};
+      \node (pn2) at (-4.1, 4) {$P_n$};
+      \node (cdash2) at (-2.9, 4) {$C'$};
+      \node (ek2) [draw, minimum width=2cm, minimum height=2cm] at (-3.5, 2) {$E_k$};
+      \node (cn2) [draw, minimum width=2cm, minimum height=1cm] at (-3.5,0) {$C_{n-1}$};
+      \draw (-3.6, 3.5) -- (-3.6, 4.5);
+      \draw[->] (auxp1) -- (ek2);
+      \draw[->] (ek2) -- (cn2);
+
+      % Decryption Title
+      \node (title2) [font=\large] at (2,5) {Decryption};
+
+      % Decryption - Left side
+      \node (cpn1) [draw, minimum width=2cm, minimum height=1cm] at (0.5,4) {$C_{n-1}$};
+      \node (dek1) [draw, minimum width=2cm, minimum height=2cm] at (0.5, 2) {$D_k$};
+      \node (dcdash1) at (1.1, 0) {$C'$};
+      \node (dpn1) at (-0.1, 0) {$P_n$};
+      \node (dauxc1) [draw, minimum width=2cm, minimum height=1cm] at (0.5, 0) {};
+      \draw (0.4, 0.5) -- (0.4, -0.5);
+      \draw[->] (cpn1) -- (dek1);
+      \draw[->] (dek1) -- (dauxc1);
+
+      % Decryption - Right side
+      \node (dauxp1) [draw, minimum width=2cm, minimum height=1cm] at (3.5, 4) {};
+      \node (dcn2) at (2.9, 4) {$C_n$};
+      \node (dcdash2) at (4.1, 4) {$C'$};
+      \node (dek2) [draw, minimum width=2cm, minimum height=2cm] at (3.5, 2) {$D_k$};
+      \node (dpn2) [draw, minimum width=2cm, minimum height=1cm] at (3.5,0) {$P_{n-1}$};
+      \draw (3.4, 3.5) -- (3.4, 4.5);
+      \draw[->] (dauxp1) -- (dek2);
+      \draw[->] (dek2) -- (dpn2);
+
+    \end{tikzpicture}
+\end{center}
+
+Bei Ciphertext Stealing wird der vorletzte komplette Block $P_{n-1}$ verschlüsselt und in Teile $C_n$ und $C'$ aufgeteilt. 
+Dann wird der letzte Block $P_n$ mit $C'$ gepadded und verschlüsselt. Dieser komplette Block $C_{n-1}$ kommt an die vorletzte Stelle des Ciphertexts und der noch nicht 
+verwendete Teil $C_n$ wird angehängt. So kann die Nachricht mit Block Ciphern verschlüsselt werden, ohne sie zu verlängern.
+
+\section{Hash Funktionen}
+\section{Byteweise}
+\section{RSA}
+\section{OAEP}
+
+
+% \begin{itemize}
+% \end{itemize}
+
+% \begin{enumerate}
+% \end{enumerate}
+
+% \begin{align*}
+% \end{align*}
