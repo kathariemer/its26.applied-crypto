@@ -5,11 +5,13 @@
 \usepackage[ngerman]{babel}
 \usepackage{colortbl}
 \usepackage{dirtytalk}
+\usepackage{enumitem}
 \usepackage{graphicx}
-\usepackage{hyperref}
 \usepackage{imakeidx}
 \usepackage{tikz}
 \usepackage{xcolor}
+% generally hyperref should be loaded last
+\usepackage{hyperref}
 
 \usetikzlibrary{positioning}
 
@@ -26,5 +28,7 @@
 \definecolor{blue-1}{HTML}{a0c4ff}
 \definecolor{purple-1}{HTML}{bdb2ff}
 \definecolor{magenta-1}{HTML}{ffc6ff}
+
+\setlist[itemize]{noitemsep}
 
 \makeindex
