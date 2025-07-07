@@ -10,9 +10,9 @@ und sie zum Zeitpunkt der Verschlüsselung bereits vollständig vorhanden sind.
 \paragraph{Streamcipher}\index{Streamcipher} Die Daten werden verschlüsselt, sobald sie zu Verfügung stehen, und werden dann laufend mit dem 
 Schlüsselstrom\index{Schlüsselstrom}\index{Keystream} verknüpt. 
 Das erfordert Synchronisation zwischen Sender und Empfänger. Dieser Verschlüsselungsmodus ist für zeitkritische Anwendungen geeignet, bei denen man nicht warten kann, bis 
-ein kompletter Block an Daten vorhanden ist.
+ein kompletter Block an Daten vorhanden ist. \\
 
-Bei beiden Varianten ist die wichtigste Voraussetzung, den verwendeten Schlüssel sicher zu übertragen.
+\noindent Bei beiden Varianten ist die wichtigste Voraussetzung, den verwendeten Schlüssel sicher zu übertragen.
 
 \section{Blockcipher}
 
@@ -46,7 +46,7 @@ Die Auswahlkriterien für Blockcipher sind:
 
 \subsection{ECB (Electronic Codebook Mode)}\index{Blockcipher Modi!ECB}\index{ECB}
 
-Die Verschlüsselung von Plaintext Block $p_i$ ist
+Die Verschlüsselung von Plaintext Block $p_i$ bzw. die Entschlüsselung vom Cipherblock $c_i$ ist
 
 \begin{align*}
     c_i = E_K(p_i) \\
@@ -72,7 +72,7 @@ Die Nachteile sind:
 
 \subsection{CBC (Cipher Block Chaining)}\index{Blockcipher Modi!CBC}\index{CBC}
 
-Die Verschlüsselung von Plaintext Block $p_i$ ist
+Die Verschlüsselung von Plaintext Block $p_i$ bzw. die Entschlüsselung vom Cipherblock $c_i$ ist
 
 \begin{align*}
     c_i = E_K(p_i \oplus c_{i-1}) \\
@@ -98,7 +98,7 @@ Die Nachteile sind:
 
 \subsection{PCBC (Propagating Cipher Block Chaining)}\index{Blockcipher Modi!PCBC}\index{PCBC}
 
-Die Verschlüsselung von Plaintext Block $p_i$ ist
+Die Verschlüsselung von Plaintext Block $p_i$ bzw. die Entschlüsselung vom Cipherblock $c_i$ ist
 
 \begin{align*}
     c_i = E_K(p_i \oplus c_{i-1} \oplus p_{i-1}) \\
@@ -233,7 +233,7 @@ Das NBS, der Vorläufer des heutigen NIST, beschloss 1972 einen standardisierten
 \end{itemize}
 
 Beim ersten Aufruf gab es keine (brauchbaren) Einsendungen, beim zweiten (1974) dann eine von IBM, Lucifer. Dieser wurde mit Hilfe der NSA evaluiert, verändert und 
-1975 veröffentlicht, ab 1976 Standard. DES wurde weitflächig übernommen, auch von Banken, Einzelhandel, Telekommunikation, etc.
+1975 veröffentlicht, ab 1976 Standard. DES wurde weitflächig übernommen, auch von Banken, Einzelhandel, Telekommunikation, etc. \\
 
 Laut heutiger Aussage war die Veröffentlichung der ``größter Fehler der NSA'' - sie war der Meinung, es ginge bei DES nur um Hardwareimplementierungen.
 Bis 1994 nur Hardware zertifiziert, keine Software. Ab 1983 wurde der Standard alle 5 Jahre reviewt:
@@ -253,12 +253,21 @@ Bis 1994 nur Hardware zertifiziert, keine Software. Ab 1983 wurde der Standard a
 
 DES ist ein symmetrischer Blockcipher mit Blockgröße 64 Bit. Die Schlüsselgröße ist 64 Bit, aber effektiv nur 56, da jedes 8.Bit ein Prüfbit ist. \\
 
-Die Grundprinzipien ist Konfusion und Diffusion: Konfusion \index{Konfusion}\index{Blockcipher!Konfusion} heißt, die Beziehung zwischen Klartext, Schlüssel und Ciphertext soll so komplex wie möglich 
-sein.
-Diffusion \index{Diffusion}\index{Blockcipher!Diffusion} heißt, der Ciphertext hängt von so vielen Klartext Bits ab wie nur möglich.
+\noindent Die Grundprinzipien sind Konfusion und Diffusion: 
 
-DES wird mittels Permutationen und Substitutionen realisiert, die 16 Mal (als ``Runden'') wiederholt werden. Diese Struktur eignet sich sehr gut für 
-Hardwareimplementierungen.
+\subparagraph{Konfusion} \index{Konfusion}\index{Blockcipher!Konfusion} heißt, die Beziehung zwischen Klartext, Schlüssel und Ciphertext 
+soll so komplex wie möglich sein.
+\subparagraph{Diffusion} \index{Diffusion}\index{Blockcipher!Diffusion} heißt, der Ciphertext hängt von so vielen Klartext Bits ab wie nur möglich. \\
+
+\begin{figure}[h]
+    \includegraphics[width=0.8\textwidth]{figures/fig05-des-round.png}
+    \centering
+    \caption{Eine Runde in DES, Bruce Schneier, Applied Cryptography, 2nd Edition, Fig. 12.2}
+    \label{fig:des-round}
+\end{figure}
+
+DES wird mittels Permutationen und Substitutionen realisiert, die 16 Mal (als ``Runden'') wiederholt werden, siehe Abb. \ref{fig:des-round}. Diese Struktur eignet sich 
+sehr gut für Hardwareimplementierungen.
 
 \begin{enumerate}
     \item Der 64-Bit Input wird initial permutiert.
@@ -271,7 +280,7 @@ Hardwareimplementierungen.
     \item Für das Endergebnis werden beide Hälften zusammengefügt und final permutiert, das Ergebnis hat wie der Input 64 Bit.
 \end{enumerate}
 
-Die Entschlüsselung erfolgt bei DES völlig symmetrisch zur Verschlüsselung, einzig die Rundenkeys müssen in umgekehrter Reihenfolge erzeugt und verwendet werden.
+Die Entschlüsselung erfolgt bei DES völlig symmetrisch zur Verschlüsselung, einzig die Rundenkeys müssen in umgekehrter Reihenfolge erzeugt und verwendet werden. \\
 
 Die zertifizierten Modi von DES sind ECB, CBC, OFB (Output Feedback Mode) und CFB (Cipher feedback). Implementierungen: zwischen 700 Mbit/sec (Software, OpenSSL) und 
 768.000.000.000 keys/sec (Hardware, crack.sh). Der DES wird heute nicht mehr weiterentwickelt.
@@ -293,41 +302,44 @@ werden sie oft ausgelassen, weil sie dort schwer und mit vielen Bitoperationen i
 \paragraph{Key Transformation mit Compression Permutation}
 
 Bei der Key Transformation wird vom 64-Bit Key jedes 8. Bit verworfen. Die übrigen Bits werden in zwei Hälften zu je 28 Bit geteilt und in 16 Runden zirkulär nach links 
-geshiftet. Dabei wird fast immer um 2 Bit geshiftet, außer in Runden 1, 2, 9 und 16, wo nur um 1 Bit geshiftet wird.
+geshiftet. Dabei wird fast immer um 2 Bit geshiftet, außer in Runden 1, 2, 9 und 16, wo nur um 1 Bit geshiftet wird, Tabellen \ref{tab:key-tranformation-1} und 
+\ref{tab:key-tranformation-2}.
 
-\begin{table}[h]
+% \begin{samepage}
+\begin{table}[H]
     \centering
         \begin{tabular}{|*{16}{c|}}
-        \hline
-        % Row 1 (cells 1-16)
-        \cellcolor{red-1}1 & \cellcolor{red-1}2 & \cellcolor{red-1}3 & \cellcolor{red-1}4 & 
-        \cellcolor{red-1}5 & \cellcolor{red-1}6 & \cellcolor{red-1}7 & \cellcolor{red-1}8 & 
-        \cellcolor{yellow-1}9 & \cellcolor{yellow-1}10 & \cellcolor{yellow-1}11 & \cellcolor{yellow-1}12 & 
-        \cellcolor{yellow-1}13 & \cellcolor{yellow-1}14 & \cellcolor{yellow-1}15 & \cellcolor{yellow-1}16 \\
-        \hline
-        % Row 2 (cells 17-32)
-        \cellcolor{green-1}17 & \cellcolor{green-1}18 & \cellcolor{green-1}19 & \cellcolor{green-1}20 & 
-        \cellcolor{green-1}21 & \cellcolor{green-1}22 & \cellcolor{green-1}23 & \cellcolor{green-1}24 & 
-        \cellcolor{blue-1}25 & \cellcolor{blue-1}26 & \cellcolor{blue-1}27 & \cellcolor{blue-1}28 & 
-        \cellcolor{blue-1}29 & \cellcolor{blue-1}30 & \cellcolor{blue-1}31 & \cellcolor{blue-1}32 \\
-        \hline
-        % Row 3 (cells 33-48)
-        \cellcolor{orange-1}33 & \cellcolor{orange-1}34 & \cellcolor{orange-1}35 & \cellcolor{orange-1}36 & 
-        \cellcolor{orange-1}37 & \cellcolor{orange-1}38 & \cellcolor{orange-1}39 & \cellcolor{orange-1}40 & 
-        \cellcolor{purple-1}41 & \cellcolor{purple-1}42 & \cellcolor{purple-1}43 & \cellcolor{purple-1}44 & 
-        \cellcolor{purple-1}45 & \cellcolor{purple-1}46 & \cellcolor{purple-1}47 & \cellcolor{purple-1}48 \\
-        \hline
-        % Row 4 (cells 49-64)
-        \cellcolor{cyan-1}49 & \cellcolor{cyan-1}50 & \cellcolor{cyan-1}51 & \cellcolor{cyan-1}52 & 
-        \cellcolor{cyan-1}53 & \cellcolor{cyan-1}54 & \cellcolor{cyan-1}55 & \cellcolor{cyan-1}56 & 
-        \cellcolor{magenta-1}57 & \cellcolor{magenta-1}58 & \cellcolor{magenta-1}59 & \cellcolor{magenta-1}60 & 
-        \cellcolor{magenta-1}61 & \cellcolor{magenta-1}62 & \cellcolor{magenta-1}63 & \cellcolor{magenta-1}64 \\
-        \hline
+            \hline
+            % Row 1 (cells 1-16)
+            \cellcolor{red-1}1 & \cellcolor{red-1}2 & \cellcolor{red-1}3 & \cellcolor{red-1}4 & 
+            \cellcolor{red-1}5 & \cellcolor{red-1}6 & \cellcolor{red-1}7 & \cellcolor{red-1}8 & 
+            \cellcolor{yellow-1}9 & \cellcolor{yellow-1}10 & \cellcolor{yellow-1}11 & \cellcolor{yellow-1}12 & 
+            \cellcolor{yellow-1}13 & \cellcolor{yellow-1}14 & \cellcolor{yellow-1}15 & \cellcolor{yellow-1}16 \\
+            \hline
+            % Row 2 (cells 17-32)
+            \cellcolor{green-1}17 & \cellcolor{green-1}18 & \cellcolor{green-1}19 & \cellcolor{green-1}20 & 
+            \cellcolor{green-1}21 & \cellcolor{green-1}22 & \cellcolor{green-1}23 & \cellcolor{green-1}24 & 
+            \cellcolor{blue-1}25 & \cellcolor{blue-1}26 & \cellcolor{blue-1}27 & \cellcolor{blue-1}28 & 
+            \cellcolor{blue-1}29 & \cellcolor{blue-1}30 & \cellcolor{blue-1}31 & \cellcolor{blue-1}32 \\
+            \hline
+            % Row 3 (cells 33-48)
+            \cellcolor{orange-1}33 & \cellcolor{orange-1}34 & \cellcolor{orange-1}35 & \cellcolor{orange-1}36 & 
+            \cellcolor{orange-1}37 & \cellcolor{orange-1}38 & \cellcolor{orange-1}39 & \cellcolor{orange-1}40 & 
+            \cellcolor{purple-1}41 & \cellcolor{purple-1}42 & \cellcolor{purple-1}43 & \cellcolor{purple-1}44 & 
+            \cellcolor{purple-1}45 & \cellcolor{purple-1}46 & \cellcolor{purple-1}47 & \cellcolor{purple-1}48 \\
+            \hline
+            % Row 4 (cells 49-64)
+            \cellcolor{cyan-1}49 & \cellcolor{cyan-1}50 & \cellcolor{cyan-1}51 & \cellcolor{cyan-1}52 & 
+            \cellcolor{cyan-1}53 & \cellcolor{cyan-1}54 & \cellcolor{cyan-1}55 & \cellcolor{cyan-1}56 & 
+            \cellcolor{magenta-1}57 & \cellcolor{magenta-1}58 & \cellcolor{magenta-1}59 & \cellcolor{magenta-1}60 & 
+            \cellcolor{magenta-1}61 & \cellcolor{magenta-1}62 & \cellcolor{magenta-1}63 & \cellcolor{magenta-1}64 \\
+            \hline
         \end{tabular}
-    \caption{Input Array für den Schlüssel mit 64 Bit}
+    \caption{(Key-Transformation) Input-Array für den Schlüssel mit 64 Bit}
+    \label{tab:key-tranformation-1}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \begin{minipage}[t]{0.45\textwidth}
         \begin{tabular}{|*{7}{c|}}
@@ -370,12 +382,11 @@ geshiftet. Dabei wird fast immer um 2 Bit geshiftet, außer in Runden 1, 2, 9 un
             \hline
         \end{tabular}
     \end{minipage}
-    \caption{Output Arrays mit den Schlüsseln $K_1$ und $K_2$}
+    \caption{(Key-Transformation) Zwischen-Arrays mit Schlüsseln $K_1$ und $K_2$}
+    \label{tab:key-tranformation-2}
 \end{table}
 
-Nach dem Shiften werden aus den übrigen 56 Bits 48 ausgewählt und permutiert (``Compression Permutation''\index{Compression Permutation}):
-
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \begin{tabular}{|*{14}{c|}}
         \hline
@@ -404,10 +415,11 @@ Nach dem Shiften werden aus den übrigen 56 Bits 48 ausgewählt und permutiert (
         \cellcolor{purple-1}53 & \cellcolor{purple-1}54 & \cellcolor{purple-1}55 & \cellcolor{purple-1}56 \\
         \hline
     \end{tabular}
-    \caption{Input Array für mit 56 Bit}
+    \caption{(Key-Transformation) Input-Array für Compression Permutation mit 56 Bit}
+    \label{tab:key-tranformation-3}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \begin{tabular}{|*{12}{c|}}
         \hline
@@ -436,8 +448,13 @@ Nach dem Shiften werden aus den übrigen 56 Bits 48 ausgewählt und permutiert (
         \cellcolor{purple-1}50 & \cellcolor{cyan-1}36 & \cellcolor{green-1}29 & \cellcolor{green-1}32 \\
         \hline
     \end{tabular}
-    \caption{Output Array nach ``Compression Permutation'' (48 bit)}
+    \caption{(Key-Transformation) Output-Array nach ``Compression Permutation'' (48 bit)}
+    \label{tab:key-tranformation-4}
 \end{table}
+% \end{samepage}
+
+Nach dem Shiften werden aus den übrigen 56 Bits (Tabelle \ref{tab:key-tranformation-3}) 48 ausgewählt und permutiert 
+(``Compression Permutation''\index{Compression Permutation}) (Tabelle \ref{tab:key-tranformation-4}):
 
 \begin{itemize}
     \item Weil jedes 8te Bit im Key ein Parity Bit ist, ist die faktische Länge des Keys statt 64 nur 56 Bit. 
@@ -473,7 +490,7 @@ es einen Lawinen Effekt (Avalanche Effect), wo möglichst viele Input Bits den O
         \cellcolor{green-1}29 & \cellcolor{green-1}30 & \cellcolor{green-1}31 & \cellcolor{green-1}32 \\
         \hline 
     \end{tabular}
-    \caption{Input Array $R_i$ (32 Bit)}
+    \caption{(Expansion Permutation) Input-Array $R_i$ (32 Bit)}
 \end{table}
 
 \begin{table}[h]
@@ -501,7 +518,7 @@ es einen Lawinen Effekt (Avalanche Effect), wo möglichst viele Input Bits den O
         \cellcolor{green-1}29 & \cellcolor{green-1}30 & \cellcolor{green-1}31 & \cellcolor{green-1}32 & \cellcolor{red-1}1\\
         \hline 
     \end{tabular}
-    \caption{Zwischenergebnis Array für Expansion Permutation}
+    \caption{(Expansion Permutation) Zwischen-Array für Expansion Permutation}
 \end{table}
 
 \begin{table}[h]
@@ -529,7 +546,7 @@ es einen Lawinen Effekt (Avalanche Effect), wo möglichst viele Input Bits den O
         \cellcolor{green-1}29 & \cellcolor{green-1}32 \\
         \hline 
     \end{tabular}
-    \caption{Output Array nach Expansion Permutation (sic)}
+    \caption{(Expansion Permutation) Output-Array nach Expansion Permutation (sic)}
 \end{table}
 
 \begin{itemize}
@@ -583,14 +600,7 @@ Die Designkriterien der P-Boxen waren:
 
 \paragraph{DES Runden}
 
-\begin{figure}[h]
-    \includegraphics[width=0.8\textwidth]{figures/fig05-des-round.png}
-    \centering
-    \caption{Eine Runde in DES, Bruce Schneier, Applied Cryptography, 2nd Edition, Fig. 12.2}
-\end{figure}
-
-
-Nach 5 Runden ist jedes Outputbit eine Funktion jedes Input- und jedes Keybits.
+Nach 5 Runden ist jedes Outputbit eine Funktion jedes Input- und jedes Keybits. \\
 Nach 8 Runden ist der Output quasi eine Zufallsfunktion -- aber durch differentielle Kryptoanalyse ((wieder)entdeckt 1990)
 kann jede DES Implementierung innerhalb von 16 Runden gebrochen werden. 
 
@@ -833,7 +843,7 @@ Sei $b$ die Blocklänge des Ciphers. AES operiert auf einem State:
 \paragraph{Sub-Bytes} ist die einzige nicht-lineare Operation in AES. (? Todo: \verb|folien AK_02_block_v02.pdf|, Seite 65)
 
 \begin{itemize}
-    \item Konfusion
+    \item Konfusion\index{Konfusion}
     \item S-Box 
     \item Die einzelnen Bytes werden als Elemente von $GF(2^8)$ betrachtet
     \item Irreduzibles Polynom ist $x^8 + x^4 + x^3 + x + 1$
@@ -860,7 +870,7 @@ Sei $b$ die Blocklänge des Ciphers. AES operiert auf einem State:
 
 \paragraph{ShiftRows}
 
-Diffusion:
+Diffusion\index{Diffusion}
 \begin{itemize}
     \item Jede Zeile des States wird zyklisch nach links geshiftet
     \item Offsets: 0,1,2,3 für 128 Bit Blocklänge
@@ -871,7 +881,7 @@ Diffusion:
 
 \paragraph{MixColumns}
 
-Diffusion
+Diffusion\index{Diffusion}
 \begin{itemize}
     \item Arbeitet auf den Spalten des States (wegen 32-Bit Architektur sind 4 Zeilen, d.h. 32 Bit pro Spalte optimal)
     \item Bytes einer Spalte werden Koeffizienten eines Polynoms vom Grad 3 in $GF(2^8)$ betrachtet
@@ -1018,7 +1028,7 @@ $$\text{InvMixColumns}(\text{State} \oplus \text{Roundkey}) = \text{InvMixColumn
 \begin{itemize}
     \item Anzahl der Runden
     \begin{itemize}
-        \item Volle Diffusion nach 2 Runden (mit Feistelnetzwerk nicht erreichbar)
+        \item Volle Diffusion\index{Diffusion} nach 2 Runden (mit Feistelnetzwerk nicht erreichbar)
         \item Änderung in einem State Bit beeinflusst ungefähr die Hälfte aller State Bits nach 2 Runden
         \item Keine Attacken für Versionen ab 6 Runden gefunden
         \item 4 Runden Security Margin hinzugefügt, damit also quasi je einmal volle Diffusion am Anfang und am Ende hinzugefügt
@@ -1087,7 +1097,8 @@ Verfügung stehen. Das wird überall dort gebraucht, wo Latenzen ein Problem ber
 sein wie die Daten.
 Im Idealfall ist der Schlüsselstrom eine komplette Zufallsfolge (siehe One-Time Pad). \\
 
-\noindent Bei Streamciphern sind Konfusion und Diffusion nicht möglich. Das heißt die Sicherheit liegt allein in der Qualität des Schlüsselstroms. \\
+\noindent Bei Streamciphern sind Konfusion\index{Konfusion} und Diffusion\index{Diffusion} nicht möglich (sic! Vgl. ChaCha20). Das heißt die Sicherheit liegt allein in 
+der Qualität des Schlüsselstroms. \\
 
 \noindent Streamcipher werden sehr oft gerade in der Telekommunikationsbranche verwendet,
 allerdings gibt es sehr wenige Spezifikationen die öffentlich oder standardisiert sind. Eine Initiative, die versucht eine Standardisierung zu erreichen war z.B. das
@@ -1266,7 +1277,7 @@ Er ist schnell, sicher und einfach zu implementieren und hat breite Verwendung g
 
 \noindent Für diesen Cipher sind keine praktischen Angriffe bekannt, er ist sogar resistent gegen Timing-Angriffe.\\
 
-\noindent Die Runden, die in der Berechnung durchlaufen werden, sorgen für eine gute Diffusion. \\
+\noindent Die Runden, die in der Berechnung durchlaufen werden, sorgen für eine gute Diffusion\index{ChaCha20!Diffusion}. \\
 
 \noindent Der ChaCha20 wird häufig in Kombination mit dem Authentifizierungsalgorithmus Poly1305  verwendet, das ChaCha20-Poly1305 AEAD\index{AEAD}. \\
 
