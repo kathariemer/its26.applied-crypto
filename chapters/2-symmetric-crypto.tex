@@ -519,7 +519,7 @@ es einen Lawinen Effekt (Avalanche Effect), wo möglichst viele Input Bits den O
 
 \begin{itemize}
     \item Der Datenblock muss auf Schlüsselgröße erweitert werden
-    \item Durch Wiederholung einzelner Bits breitet sich Einfluss des Inputs aufden Output schneller aus (ein Inputbit beeinflusst 2 S-Box Lookups)
+    \item Durch Wiederholung einzelner Bits breitet sich Einfluss des Inputs auf den Output schneller aus (ein Inputbit beeinflusst 2 S-Box Lookups)
 \end{itemize}
 
 \paragraph{S-Boxen}
@@ -926,7 +926,7 @@ Diffusion\index{Diffusion}
         \cellcolor{cyan-1}15 & \cellcolor{red-1}3 & \cellcolor{yellow-1}7 & \cellcolor{green-1}11 \\
         \hline 
     \end{tabular}
-    \caption{(ShifRows) Array vor und nach der Operation.}
+    \caption{(ShiftRows) Array vor und nach der Operation.}
 \end{table}
 
 \paragraph{MixColumns}
@@ -1362,9 +1362,9 @@ Inputs:
     \item Counter (32 Bit)
 \end{itemize}
 
-\noindent Zwei Nachrichten mit demselben Key dürfen nicht den gleichen Ciphertext erzeugen. Der Counterwird pro 64-Byte-Block erhöht. \\
+\noindent Zwei Nachrichten mit demselben Key dürfen nicht den gleichen Ciphertext erzeugen. Der Counter wird pro 64-Byte-Block erhöht. \\
 
-\noindent Output: Keystream\index{Schlüsselstrom!ChaCha20}\index{Keystream!ChaCha20}, der aus Key, Nonce und Counter erzeugt wird und mit dem Plaintext verxort den Ciphertext stream ergibt.\\
+\noindent Output: Keystream\index{Schlüsselstrom!ChaCha20}\index{Keystream!ChaCha20}, der aus Key, Nonce und Counter erzeugt wird und mit dem Plaintext verxort den Ciphertextstream ergibt.\\
 
 Es gibt einen internen 512-Bit-State, der aus 16 ($4\times 4$) 32-Bit-Wörtern besteht:
 \begin{itemize}
