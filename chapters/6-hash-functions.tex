@@ -1,4 +1,4 @@
-\chapter{Hash-Funktionen}
+\chapter{Hashfunktionen}\index{Hashfunktion}
 
 Die Anforderungen an eine kryptographische Hashfunktion sind:
 \begin{itemize}
@@ -13,7 +13,8 @@ Die Anforderungen an eine kryptographische Hashfunktion sind:
 Grundsätzlich sind für eine Hashfunktion zwei Komponenten nötig, eine Kompressionsfunktion, die längere Inputs auf die gewünschte Länge komprimieren, und ein Domain 
 Extender, der aus Funktionen mit Eingaben fester Länge Funktionen mit Eingabe beliebiger Länge macht.
 
-\paragraph{Kompressionsfunktionen} haben für einen fixen Input $m$ einen fixen Output $n$ mit $|m| > |n|$.
+\paragraph{Kompressionsfunktionen}\index{Kompressionsfunktion}\index{Hashfunktion!Kompressionsfunktion} haben für einen fixen Input $m$ einen fixen Output $n$ mit 
+$|m| > |n|$.
 
 Es wird entweder eine eigens für den Hash geschriebene Funktion verwendet, z.B. bei MD5 und SHA-1, SHA-2, SHA-3, oder es wird ein Blockcipher eingesetzt. Bei einem 
 Blockcipher wird ein Input der Länge $k+l$ (Länge des Schlüssels und Länge des Klartexts) auf einen Input der Länge $l$ gemappt. \\
@@ -26,7 +27,8 @@ Die zwei häufigsten Konstruktionen sind
 
 
 
-\paragraph{Domain Extender} machen aus einer Funktion, die nur Inputs mit einer fixen Länge $n$ nimmt, eine Funktion die Inputs mit beliebiger Länge nimmt. 
+\paragraph{Domain Extender}\index{Hashfunktion!Domain Extender}\index{Domain Extender} machen aus einer Funktion, die nur Inputs mit einer fixen Länge $n$ nimmt, eine 
+Funktion die Inputs mit beliebiger Länge nimmt. 
 
 Mehr oder weniger alle modernen Hashfunktionen folgen diesem Prinzip:
 
@@ -49,7 +51,7 @@ Mehr oder weniger alle modernen Hashfunktionen folgen diesem Prinzip:
     \end{itemize}
 \end{enumerate}
 
-\section{Algebraische Hashfunktionen}
+\section{Algebraische Hashfunktionen}\index{Hashfunktion!algebraisch}
 
 In der Praxis werden aus Geschwindigkeitsgründen hauptsächlich Hashfunktionen
 basierend auf logischen Funktionen verwendet. Algebraische Funktionen sind kaum verbreitet, sie basieren auf ähnlichen Argumentationen wie
@@ -64,7 +66,7 @@ $$H(x) = g^x \mod n (\text{mit } n = p\cdot q),$$
 
 wo das Umkehren der Funktion äquivalent zum Lösen des RSA Problems ist.
 
-\section{MD5} wurde 1991 von Ron Rivest als verbesserter Nachfolger zu MD4 erfunden.
+\section{MD5}\index{MD5}\index{Hashfunktion!MD5} wurde 1991 von Ron Rivest als verbesserter Nachfolger zu MD4 erfunden.
 
 \begin{itemize}
     \item 1996 erste Fehler entdeckt, 2004 weitere Schwachstellen gefunden
@@ -98,12 +100,12 @@ Die Funktion erzeut in 64 Operationen (in 4 Runden zu je 16 Operationen) einen O
 \end{figure}
 
 
-\section{SHA (Secure Hash Algorithm)}
+\section{SHA (Secure Hash Algorithm)}\index{Hashfunktion!SHA}\index{SHA}
 
 1993 wurde SHA-0 veröffentlicht, 1995 dann der verbesserte SHA-1 und 2001 SHA-2. Das NIST hat SHA-3 ausgeschrieben, das Ende des Auswahlprozesses war 2012 (vgl. AES).
 Dann wurde Keccak als SHA-3 2015 standardisiert. \\
 
-\paragraph{SHA-1}
+\paragraph{SHA-1}\index{SHA-1}
 Der SHA-1 mit voller Rundenzahl gilt seit 2005 als unsicher. Kollisionen können mit $2^{63}$ Operationen erzeugt werden, 2008 wurde die Zahl auf $2^{51}$ verringert.
 Seit 2017 sind Kollisionen in 2 validen PDF Dokumenten konstruierbar. \\
 
@@ -128,7 +130,8 @@ Er erzeugt einen 160 Bit Output und basiert auf denselben Grundideen wie MD4 und
     \item In jeder Runde um 30 zirkulär geshiftet
 \end{itemize}
 
-\paragraph{SHA-2} beschreibt eine Familie an Hashfunktionen, die die Algorithmen SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224 und SHA-512/256. Sie sind im FIPS 
+\paragraph{SHA-2}\index{SHA-2} beschreibt eine Familie an Hashfunktionen, die die Algorithmen SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224 und SHA-512/256. Sie sind im 
+FIPS 
 (Federal Information Processing Standards) PUB-180-4 beschrieben.
 
 
@@ -156,7 +159,7 @@ Er erzeugt einen 160 Bit Output und basiert auf denselben Grundideen wie MD4 und
 Sicherheit (wegen 1024-Bit Blockgröße) und kürzeren Hashes.
 
 
-\subparagraph{Merkle-Damgard}
+\subparagraph{Merkle-Damgard}\index{Merkle-Damgard}\index{Hashfunktion!Merkle-Damgard}
 
 Die Merkle-Damg\r{a}rd-Konstruktion (auch Merkles Meta-Verfahren) ist eine Methode zur Konstruktion von kryptographischen Hash-Funktionen, die auf Arbeiten von 
 Ralph Merkle und Ivan Damg\r{a}rd zurückgeht.
@@ -182,8 +185,7 @@ eine kollisionssichere Hash-Funktion $h: \{0, 1\}^* \to \{0, 1\}^b$, die beliebi
     \item Finales Ergebnis: Der Ausgabewert nach dem letzten Block ist der Hash-Wert.
 \end{enumerate}
 
-\subsection{SHA-3}
-
+\subsection{SHA-3}\index{SHA-3}
 
 2007 begann das NIST mit der Ausschreibung für einen Nachfolger von SHA-2. Am 2.10.2012 wurde Keccak (von Guido
 Bertoni, Joan Daemen, Gilles Van Assche und Michaël Peeters) als Sieger verkündet und stellt die Basis für SHA-3 dar.
@@ -255,7 +257,7 @@ Sie sind sehr flexibel für Anwendungen wie:
 SHAKE bezeichnet den KECCAK Algorithmus, der er ein anderes Padding (1111 statt 01) und eine variable Ausgabelänge hat.
 
 
-\section{Angriffe}
+\section{Angriffe}\index{Hashfunktion!Angriffe}\index{Angriffe!Hashfunktion}
 
 Sei $n$ die Länge des Outputs. Die Angriffe auf Hashfunktionen können wie folgt kategorisiert werden:
 

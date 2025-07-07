@@ -1,4 +1,4 @@
-\chapter{Padding}
+\chapter{Padding}\index{Padding}
 
 Bei allen Algorithmen, die Nachrichten in festen Blöcken verarbeiten, muss die Nachrichtenlänge
 ein Vielfaches der Blocklänge sein. Das gilt z.B. bei Blockciphern, aber auch bei Hashfunktionen etc. \\
@@ -34,7 +34,7 @@ Bei CBC gibt es folgendes Schema:
     \item Problem: Angreifer kann durch Manipulation des Ciphertextes gezielt Bits im letzten Klartextblock verändern
 \end{enumerate}
 
-\paragraph{Ciphertext stealing}
+\paragraph{Cipher Text stealing}\index{Cipher Text Stealing}
 
 \begin{center}
     \begin{tikzpicture}[node distance=1cm and 1.5cm, every node/.style={align=center}]
@@ -87,11 +87,11 @@ Bei CBC gibt es folgendes Schema:
     \end{tikzpicture}
 \end{center}
 
-Bei Ciphertext Stealing wird der vorletzte komplette Block $P_{n-1}$ verschlüsselt und in Teile $C_n$ und $C'$ aufgeteilt. 
+Bei Cipher Text Stealing wird der vorletzte komplette Block $P_{n-1}$ verschlüsselt und in Teile $C_n$ und $C'$ aufgeteilt. 
 Dann wird der letzte Block $P_n$ mit $C'$ gepadded und verschlüsselt. Dieser komplette Block $C_{n-1}$ kommt an die vorletzte Stelle des Ciphertexts und der noch nicht 
 verwendete Teil $C_n$ wird angehängt. So kann die Nachricht mit Block Ciphern verschlüsselt werden, ohne sie zu verlängern.
 
-\section{Hash Funktionen}
+\section{Hashfunktionen}\index{Padding!Hashfunktion}
 
 \paragraph{MD5 und SHA-1} Hier muss die Nachricht um 64 Bits kleiner sein als ein Vielfaches von 512.
 Das Padding ist eine 1 und entsprechend vielen 0 auf die benötigte Länge. Danach werden 64 Bit mit der Länge der ungepaddeten Nachricht angehängt, das erzeugt eine 
@@ -122,7 +122,7 @@ verwendet.
 
 \paragraph{Zero Padding} Mit 0x00 aufgefüllt, ist nicht reversibel
 
-\section{RSA}
+\section{RSA}\index{Padding!RSA}
 
 Zu kurze Nachrichten problematisch zu verschlüsseln. Ursprünglich wurde einfach mit Zufallsdaten auf bestimmte Länge aufgefüllt
 Im ersten Public-Key Cryptography Standards (PKCS) < v2.0:
@@ -145,7 +145,7 @@ Im ersten Public-Key Cryptography Standards (PKCS) < v2.0:
 
 Mittlerweile iwrd üblicherweise Optimal Asymmetric Encryption Padding (OAEP) verwendet, eingeführt in PKCS\#1 v2.0
 
-\section{OAEP (Optimal Asymmetric Encryption Padding)}
+\section{OAEP (Optimal Asymmetric Encryption Padding)}\index{OAEP}\index{Optimal Asymmetric Encryption Padding}\index{Padding!OAEP}
 
 \paragraph{Ablauf}
 
@@ -192,7 +192,7 @@ Sowohl $DB_{masked}$ als auch $r_{masked}$ müssen vollständig bekannt sein, um
 mittels $r$ dann $DB$ und in Folge $M$.
 OAEP erschwert die Rekonstruktion des Klartextes für einen Angreifer. \\
 
-\noindent Die in PKCS\#1 empfohlene Parameter für RSAES-OAEP sind 
+\noindent Die in PKCS\#1 empfohlene Parameter für RSAES-OAEP (RSA Encryption Standard OAEP) sind 
 \begin{itemize}
     \item Hash: SHA-1/256/384/512, d.h. die Hashlänge ist 20, 32, 48 oder 64 Bytes
     \item Mask Generation Function: MGF1
@@ -206,13 +206,3 @@ OAEP erschwert die Rekonstruktion des Klartextes für einen Angreifer. \\
         \end{itemize}
     \end{itemize}
 \end{itemize}
-
-
-% \begin{itemize}
-% \end{itemize}
-
-% \begin{enumerate}
-% \end{enumerate}
-
-% \begin{align*}
-% \end{align*}

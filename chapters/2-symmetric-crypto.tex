@@ -3,20 +3,20 @@
 Bei symmetrischer Kryptographie verwenden Sender und Empfänger denselben Schlüssel, das heißt die Ver- und Entschlüsselung passieren symmetrisch.
 Bei Verschlüsselung gibt es zwei Arten:
 
-\paragraph{Blockcipher}\index{Blockchipher} Die Daten werden in Blöcke fixer Größe aufgeteilt und verschlüsselt. Das ist sinnvoll, wenn es keine zeitliche Komponente bei 
+\paragraph{Blockcipher}\index{Blockcipher} Die Daten werden in Blöcke fixer Größe aufgeteilt und verschlüsselt. Das ist sinnvoll, wenn es keine zeitliche Komponente bei 
 den Daten gibt, 
 und sie zum Zeitpunkt der Verschlüsselung bereits vollständig vorhanden sind. 
 
-\paragraph{Streamcipher}\index{Streamchipher} Die Daten werden verschlüsselt, sobald sie zu Verfügung stehen, und werden dann laufend mit dem 
+\paragraph{Streamcipher}\index{Streamcipher} Die Daten werden verschlüsselt, sobald sie zu Verfügung stehen, und werden dann laufend mit dem 
 Schlüsselstrom\index{Schlüsselstrom}\index{Keystream} verknüpt. 
 Das erfordert Synchronisation zwischen Sender und Empfänger. Dieser Verschlüsselungsmodus ist für zeitkritische Anwendungen geeignet, bei denen man nicht warten kann, bis 
 ein kompletter Block an Daten vorhanden ist.
 
 Bei beiden Varianten ist die wichtigste Voraussetzung, den verwendeten Schlüssel sicher zu übertragen.
 
-\section{Blockchipher}
+\section{Blockcipher}
 
-\begin{definition}[Blockcipher]\index{Blockchipher}
+\begin{definition}[Blockcipher]\index{Blockcipher}
 Ein Blockcipher mit einer Blocklänge von $n$ Bit ist eine invertierbare, üblicherweise deterministische Abbildung.
 
 Sei $V_n = \{0, 1\}^n$ die Menge aller $n$ Bit Vektoren und $\mathcal{K} = \{0, 1\}^k$ die Menge aller $k$ Bit Vektoren, dann sind
@@ -149,7 +149,7 @@ $P' = (P_1, P_3 \oplus C_2 \oplus P_2 \oplus P_1 \oplus C_1,  P_3 \oplus C_2 \op
 
 \subsection{XTS (oder XEX-TCB-CTS)}\index{Blockcipher Modi!XTS}\index{XTS}\index{XEX-TCB-CTS}
 
-Für das Xor-Encrypt-Xor-based Tweaked CodeBook Mode with CipherText Stealing brauchen wir einen geteilten Schlüssel $K = K_1 || K_2$, ein Tweak $i$ mit einem dazugehörigen 
+Für das Xor-Encrypt-Xor-based Tweaked CodeBook Mode with Cipher Text Stealing\index{Cipher Text Stealing} brauchen wir einen geteilten Schlüssel $K = K_1 || K_2$, ein Tweak $i$ mit einem dazugehörigen 
 $j$ (z.B. ist $i$ die Blocknummer auf der Harddisk unf $j$ der entsprechende Sektor) und ein $\alpha$, das ein primitives Element in $GF(2^{128})$ ist. 
 Es gilt für die Ver- und Entschlüsselung:
 
@@ -1075,7 +1075,7 @@ Die momentan besten Angriffe sind:
 \end{itemize}
 
 
-\section{Streamchipher}\index{Streamchipher}
+\section{Streamcipher}\index{Streamcipher}
 
 Im Gegensatz zu Blockciphern werden hier Daten verschlüsselt, sobald sie zur
 Verfügung stehen. Das wird überall dort gebraucht, wo Latenzen ein Problem bereiten.\\ 
@@ -1095,7 +1095,7 @@ eSTREAM Projekt der EU. \\
 \noindent Durch geeigneten Betriebsmodus kann beliebiger Blockcipher zu Streamcipher umgebaut werden. Damit sind grundsätzlich alle positiven, untersuchten Eigenschaften des
 Blockciphers auf den erzeugten Schlüsselstrom übertragbar.
 
-\subsection{Streamchipher Modi}\index{Streamcipher Modi}
+\subsection{Streamcipher Modi}\index{Streamcipher Modi}
 
 \paragraph{CFB (Cipher Feedback Mode)}\index{Streamcipher Modi!CFB}\index{CFB}
 
