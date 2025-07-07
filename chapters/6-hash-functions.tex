@@ -44,7 +44,7 @@ Mehr oder weniger alle modernen Hashfunktionen folgen diesem Prinzip:
     \item Ist die verwendete Funktion $f$ kollisionsresistent, so gilt das auch für $h$
     \item Im letzten Block der zu hashenden Nachricht wird die Länge der Originalnachricht angehängt, damit gleich endende aber unterschiedlich lange Nachrichten 
     unterschiedliche Hashwerte ergeben, z.B. \verb|Foo0| vs. \verb|Foo00|
-    \item Grundproblem der Konstruktion: Length Extension Attack
+    \item Grundproblem der Konstruktion: Length Extension Attack\index{Length Extension Attack}\index{Angriffe!Length Extension Attack}
     \begin{itemize}
         \item Kompletter interner State ist in Hashwert enthalten
         \item Falls MAC Konstruktion der Form H(key||Nachricht) ist, kann leicht Hashwert für verlängerte Nachricht konstruiert werden
@@ -191,7 +191,8 @@ eine kollisionssichere Hash-Funktion $h: \{0, 1\}^* \to \{0, 1\}^b$, die beliebi
 Bertoni, Joan Daemen, Gilles Van Assche und Michaël Peeters) als Sieger verkündet und stellt die Basis für SHA-3 dar.
 
 \begin{itemize}
-    \item Verwendet im Unterschied zur bisherigen SHA Familie eine sog. ``Sponge'' Konstruktion: ein 3-dimensionaler innerer Zustand ($5\times 5\times w$ -Bit Wörter; 
+    \item Verwendet im Unterschied zur bisherigen SHA Familie eine sog. ``Sponge''\index{Sponge}\index{SHA-3!Sponge} Konstruktion: ein 3-dimensionaler innerer Zustand 
+    ($5\times 5\times w$-Bit Wörter; 
     bei $w =64$ sind das 1.600 Bits)
     \item Permutation: 24 Runden, 5 Schritte ($\theta, \rho, \pi, \chi, \iota$)
     \item Zuerst wird der zu hashende Text zur Gänze ``aufgesogen'' (absorbing phase)
@@ -199,7 +200,7 @@ Bertoni, Joan Daemen, Gilles Van Assche und Michaël Peeters) als Sieger verkün
     \item Das ergibt Hashlängen von 224 bis 512 Bit (theoretisch aber beliebig lange, bis maximal 1.600); wird auch als Capacity Wert bezeichnet
 \end{itemize}
 
-\paragraph{Phasen}
+\paragraph{Phasen}\index{Sponge!Phasen}
 
 \begin{figure}[h]
     \includegraphics[width=0.75\textwidth]{figures/fig11-sponge}
@@ -207,11 +208,11 @@ Bertoni, Joan Daemen, Gilles Van Assche und Michaël Peeters) als Sieger verkün
     \caption{SHA-3, Absorbing- und Squeezing Phase}
 \end{figure}
 
-\subparagraph{Absorbieren} Eingabedaten werden in Blöcke unterteilt.
+\subparagraph{Absorbieren}\index{Sponge!Absorbieren}\index{Sponge!Absorbing Phase} Eingabedaten werden in Blöcke unterteilt.
 Jeder Block wird mit dem internen Zustand (einer Art Speicher) verXORt.
 Danach wird eine Permutation ($f$) auf den Zustand angewendet.
 
-\subparagraph{Auspressen} Nachdem alle Eingabeblöcke
+\subparagraph{Auspressen}\index{Sponge!Auspressen}\index{Sponge!Squeezing Phase} Nachdem alle Eingabeblöcke
 absorbiert wurden, wird ein Teil des internen Zustands als Ausgabe extrahiert.
 Bei langen Ausgaben (z.B. SHAKE-Funktionen) wird $f$ mehrfach ausgeführt, um mehr Output zu generieren.
 
@@ -225,7 +226,7 @@ Neben der Größe des States $b$, gibt es noch die Parameter
 \begin{itemize}
     \item Rate $r$, wie viele Bits pro Sekunde verarbeitet werden können 
     \item Capacity $c$, wie groß die Sicherheitsreserve ist, sie berechnet sich als $c = b - r$. Bei Kapazität $c$  bietet der Algorithmus $c/2$ Bit Widerstand gegen 
-    Kollisions- und Preimage-Attacken. 
+    Kollisions- und Preimage-Attacken. \index{Collision Attack}\index{Preimage Attack}\index{Angriffe!Collision Attack}\index{!Preimage Attack}
 \end{itemize}
 
 Für den SHA-256 haben die Parameter $(b, r, c)$ dem Wert $(1600, 1088, 512)$.
@@ -246,7 +247,8 @@ Blockchiffren.
 kann, ist ein Padding erforderlich. SHA-3 verwendet das Muster 100...001 (01 Padding), ein Bit mit Wert 1 wird gefolgt von null oder mehr 0-Bits (maximal $r-1$) und 
 einem letzten 1-Bit.
 
-\paragraph{XOFs} (Extendable Output Functions) basieren auf KECCAK und geben beliebig viele Ausgabebits zurück (nicht nur 256 oder 512).
+\paragraph{XOFs}\index{XOF}\index{Extendable Output Function}\index{SHA-3!XOF} (Extendable Output Functions) basieren auf KECCAK und geben beliebig viele Ausgabebits 
+zurück (nicht nur 256 oder 512).
 Sie sind sehr flexibel für Anwendungen wie:
 \begin{itemize}
     \item Key Derivation Function (KDF)
@@ -286,7 +288,7 @@ Generell gilt, ein Aufwand von $2^{80}$ ist ``schwierig''.
     \item Struktur: Sponge
 \end{itemize}
 
-\subsection{BEAST Attack}
+\subsection{BEAST Attack}\index{BEAST Attack}\index{Angriffe!BEAST}
 
 Steht für \textbf{B}rowser \textbf{E}xploit \textbf{A}gainst \textbf{S}SL/\textbf{T}LS.
 \begin{itemize}

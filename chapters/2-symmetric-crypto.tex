@@ -66,7 +66,7 @@ Die Nachteile sind:
 \begin{itemize}
     \item Muster in Klartext im Ciphertext sichtbar
     \item Selber Klartext ergibt bei selbem Schlüssel immer selben Ciphertext
-    \item Block Replay Attacken: beliebige Ciphertextblöcke können entfernt, eingefügt oder ersetzt werden
+    \item Block Replay Attacken\index{Angriffe!Block Replay Attack}: beliebige Ciphertextblöcke können entfernt, eingefügt oder ersetzt werden
 \end{itemize}
 
 
@@ -672,7 +672,7 @@ $K_3$, sodass $c = E_{K_2}\left( E_{K_1}(p) \right) = E_{K_3}(p)$.
 
 Eine naive Rechnung gibt uns die Erkenntnis, dass wir statt $2^n$ verschiedenen Schlüsseln nun $2^{2n}$ verschiedene Schlüssel haben.
 
-Problem: Meet-in-the-Middle Attack, diese benötigt nur $2^{n+1}$ Versuche:
+Problem: Meet-in-the-Middle Attack\index{Angriffe!Meet-in-the-Middle Attack}\index{Meet-in-the-Middle Attack}, diese benötigt nur $2^{n+1}$ Versuche:
 
 \begin{itemize}
     \item Ist eine Known-Plaintext Attacke 
@@ -708,7 +708,8 @@ In DES wird das als Triple-DES verwendet.
     \item Option 1 ergibt einen 168(=$3\cdot 56$)Bit Key (effektiv aber nicht stärker als 112 Bit)
     \item Option 2 ergibt 112-Bit Key, ist aber stärker als einfache Double Encryption (weil meet-in-the-middle jetzt einmal $K_1K_2$ raten muss)
     \item Option 3 ist effektiv wieder DES, existiert nur aus Abwärtskompatibilität (was auch der Grund für das EDE Muster ist, ansonsten wäre z.B. EEE genauso anwendbar)
-    \item Beste Attacke ist wieder Variante von meet-in-the-middle, mit Komplexität $2^{2n}$ (und damit der Komplexität, die man bei Double Encryption hätte erwarten 
+    \item Beste Attacke ist wieder Variante von meet-in-the-middle\index{Meet-in-the-Middle Attack}\index{Angriffe!Meet-in-the-Middle Attack}, mit Komplexität $2^{2n}$ 
+    (und damit der Komplexität, die man bei Double Encryption hätte erwarten 
     können)
     \item Triple-DES wird aktuell noch bis 2023 zur Verwendung erlaubt
     \item Auch andere Varianten möglich, z.B. Independent Subkeys, Key-dependent S-Boxes,\ldots
@@ -1146,7 +1147,7 @@ Nachteile:
     \item Insertion Attack möglich
 \end{itemize}
 
-\subparagraph{Insertion Attack}
+\subparagraph{Insertion Attack}\index{Insertion Attack}\index{Angriffe!Insertion Attack}
 \begin{enumerate}
     \item Angenommen, Angreifer kennt Ciphertextstream $c = (c_1, c_2, c_3, \ldots)$ 
     \item Es gilt, $c$ entstand durch xor von Klartextstream $p$ und Schlüsselstream\index{Schlüsselstrom!Insertion Attack}\index{Keystream!Insertion Attack} 
