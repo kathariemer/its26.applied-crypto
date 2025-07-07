@@ -557,7 +557,7 @@ es einen Lawinen Effekt (Avalanche Effect), wo möglichst viele Input Bits den O
 \paragraph{S-Boxen}
 
 Der expandierte Block $R_i$ wird mit dem komprimierten Rundenschlüssel ver-xor-t. Der resultierende 48 Bit Block wird in 8 6er-Blöcke aufgeteilt. Jeder dieser 6 Bit 
-Blöcke kommt in eine eigene S-Box.
+Blöcke kommt in eine eigene S-Box. \\
 
 Jede S-Box enthält 4 Zeilen zu je 16 Spalten und hat 4 Bit große Einträge.
 
@@ -567,7 +567,7 @@ Jede S-Box enthält 4 Zeilen zu je 16 Spalten und hat 4 Bit große Einträge.
     \item Beispiel: Der 6 Bit Input \verb|100111| wird auf den Eintrag in Zeile 4 (\verb|11|), Spalte 4 (\verb|0011|) gemapped
 \end{itemize}
 
-Aus den 48 (= $8 \cdot 6$) Bit Input wird über eine nicht-lineare Operation so ein 32 (= $8 \cdot 4$) Output generiert. Dieser Schritt ist besonders wichtig in DES.
+Aus den 48 (= $8 \cdot 6$) Bit Input wird über eine nicht-lineare Operation so ein 32 (= $8 \cdot 4$) Output generiert. Dieser Schritt ist besonders wichtig in DES. \\
 
 Die Designkriterien für die S-Boxen (vgl. Don Coppersmith, The Data Encryption Standard (DES) and its strength against attacks) waren: 
 \begin{itemize}
