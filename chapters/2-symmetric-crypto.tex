@@ -889,7 +889,7 @@ Sei $b$ die Blocklänge des Ciphers. AES operiert auf einem State:
     \item Beispiel: bei 128 Bit Blocklänge ergibt sich ein $4 \times 4$ Array
 \end{itemize}
 
-\paragraph{Sub-Bytes} ist die einzige nicht-lineare Operation in AES. (? Todo: \verb|folien AK_02_block_v02.pdf|, Seite 65)
+\paragraph{SubBytes} ist die einzige nicht-lineare Operation in AES. %(? Todo: \verb|folien AK_02_block_v02.pdf|, Seite 65)
 
 \begin{itemize}
     \item Konfusion\index{Konfusion}
@@ -926,7 +926,40 @@ Diffusion\index{Diffusion}
     \item Mit diesen Offsets maximale Diffusion und größte Resistenz gegen bekannte Attacken
 \end{itemize}
 
-(todo: add graphic)
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|*{4}{c|}}
+        \hline
+        % Row 1 
+        \cellcolor{red-1}0 & \cellcolor{yellow-1}4 & \cellcolor{green-1}8 & \cellcolor{cyan-1}12 \\
+        \hline 
+        % Row 2 
+        \cellcolor{red-1}1 & \cellcolor{yellow-1}5 & \cellcolor{green-1}9 & \cellcolor{cyan-1}13 \\
+        \hline 
+        % Row 3 
+        \cellcolor{red-1}2 & \cellcolor{yellow-1}6 & \cellcolor{green-1}10 & \cellcolor{cyan-1}14 \\
+        \hline 
+        % Row 4 
+        \cellcolor{red-1}3 & \cellcolor{yellow-1}7 & \cellcolor{green-1}11 & \cellcolor{cyan-1}15 \\
+        \hline 
+    \end{tabular}\quad
+    \begin{tabular}{|*{4}{c|}}
+        \hline
+        % Row 1 
+        \cellcolor{red-1}0 & \cellcolor{yellow-1}4 & \cellcolor{green-1}8 & \cellcolor{cyan-1}12 \\
+        \hline 
+        % Row 2 
+        \cellcolor{yellow-1}5 & \cellcolor{green-1}9 & \cellcolor{cyan-1}13 & \cellcolor{red-1}1 \\
+        \hline 
+        % Row 3 
+        \cellcolor{green-1}10 & \cellcolor{cyan-1}14 & \cellcolor{red-1}2 & \cellcolor{yellow-1}6 \\
+        \hline 
+        % Row 4 
+        \cellcolor{cyan-1}15 & \cellcolor{red-1}3 & \cellcolor{yellow-1}7 & \cellcolor{green-1}11 \\
+        \hline 
+    \end{tabular}
+    \caption{(ShifRows) Array vor und nach der Operation.}
+\end{table}
 
 \paragraph{MixColumns}
 
@@ -943,10 +976,30 @@ Diffusion\index{Diffusion}
     \end{itemize}
 \end{itemize}
 
-De facto handelt es sich also um ein Polynom in $x$, dessen Koeffizienten Polynome sind. Herleitung daher allgemein einfacher.
-Notation: statt $a_{i,j}$ steht im Folgenden $a_i$, zur Wahrung der Übersichtlichkeit. \\
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|*{4}{c|}}
+        \hline
+        % Row 1 
+        $a_{0,0}$ & $a_{0,1}$ & $a_{0,2}$ & $a_{0,3}$ \\
+        \hline 
+        % Row 2 
+        $a_{1,0}$ & $a_{1,1}$ & $a_{1,2}$ & $a_{1,3}$ \\
+        \hline 
+        % Row 3 
+        $a_{2,0}$ & $a_{2,1}$ & $a_{2,2}$ & $a_{2,3}$ \\
+        \hline 
+        % Row 4 
+        $a_{3,0}$ & $a_{3,1}$ & $a_{3,2}$ & $a_{3,3}$ \\
+        \hline 
+    \end{tabular}
+    \caption{(MixColumns) Einträge des States}
+\end{table}
 
-Beispiel: Stelle 
+De facto handelt es sich also um ein Polynom in $x$, dessen Koeffizienten Polynome sind. Herleitung daher allgemein einfacher.
+Notation: statt $a_{i,j}$ steht im Folgenden $a_i$, zur Wahrung der Übersichtlichkeit, weil die Einträge eben spaltenweise ausgelesen werden. \\
+
+\paragraph{Beispiel}: Stelle das Polynom
 
 \begin{align*}
     (02a_3+a_2+a_1+03a_0)&x^3 + \\
@@ -955,7 +1008,7 @@ Beispiel: Stelle
     (a_3+a_2+03a_1+02a_0)& 
 \end{align*}
     
-    als Matrix dar:
+    in Matrixdarstellung dar:
 
 \begin{equation*}
     \begin{pmatrix}
