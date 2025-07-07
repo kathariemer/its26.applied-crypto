@@ -1243,6 +1243,13 @@ Der Keystream\index{Schlüsselstrom!One-Time Pad}\index{Keystream!One-Time Pad} 
 Bei fehlenden/eingefügten Zeichen pflanzt sich der Fehler nur über $n$ Zeichen fort,
 danach synchronisiert sich der Empfänger von selbst wieder.
 
+\subsection{Exkurs: AEAD (Authenticated Encryption with Associated Data)}\index{AEAD}\index{Authenticated Encryption with Associated Data} 
+
+AEAD bezeichnet einen Cipher Modus, der gleichzeitig (simultan!) Confidentiality und Authenticity bereitstellt. Es fügt einer verschlüsselten Nachricht einen 
+Authentifizierungs-Tag an, der den Besitz des privaten Schlüssel garantiert. Beispiele für Algorithmen, die AEAD ermöglichen sind AES-GCM oder ChaCha20-Poly1305. \\
+
+\noindent In vielen modernen Protokollen wird AEAD verwendet, z.B. TLS1.3, HTTP3 und VPNs.
+
 \subsection{ChaCha20}
 
 Der ChaCha20 wurde 2008 von Daniel J. Bernstein entwickelt und wird in RFC 8439 beschrieben. Er ist eine verbesserte Version des Salsa20 Ciphers.
@@ -1260,7 +1267,7 @@ Er ist schnell, sicher und einfach zu implementieren und hat breite Verwendung g
 
 \noindent Die Runden, die in der Berechnung durchlaufen werden, sorgen für eine gute Diffusion. \\
 
-\noindent Der ChaCha20 wird häufig in Kombination mit dem Authentifizierungsalgorithmus Poly1305  verwendet, das ChaCha20-Poly1305 AEAD. \\
+\noindent Der ChaCha20 wird häufig in Kombination mit dem Authentifizierungsalgorithmus Poly1305  verwendet, das ChaCha20-Poly1305 AEAD\index{AEAD}. \\
 
 \noindent Weitere Infos auf \url{https://cr.yp.to/chacha.html}.
 
