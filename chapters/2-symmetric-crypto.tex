@@ -3,10 +3,12 @@
 Bei symmetrischer Kryptographie verwenden Sender und Empfänger denselben Schlüssel, das heißt die Ver- und Entschlüsselung passieren symmetrisch.
 Bei Verschlüsselung gibt es zwei Arten:
 
-\paragraph{Blockcipher} Die Daten werden in Blöcke fixer Größe aufgeteilt und verschlüsselt. Das ist sinnvoll, wenn es keine zeitliche Komponente bei den Daten gibt, 
+\paragraph{Blockcipher}\index{Blockchipher} Die Daten werden in Blöcke fixer Größe aufgeteilt und verschlüsselt. Das ist sinnvoll, wenn es keine zeitliche Komponente bei 
+den Daten gibt, 
 und sie zum Zeitpunkt der Verschlüsselung bereits vollständig vorhanden sind. 
 
-\paragraph{Streamcipher} Die Daten werden verschlüsselt, sobald sie zu Verfügung stehen, und werden dann laufend mit dem Schlüsselstrom verknüpt. 
+\paragraph{Streamcipher}\index{Streamchipher} Die Daten werden verschlüsselt, sobald sie zu Verfügung stehen, und werden dann laufend mit dem 
+Schlüsselstrom\index{Schlüsselstrom}\index{Keystream} verknüpt. 
 Das erfordert Synchronisation zwischen Sender und Empfänger. Dieser Verschlüsselungsmodus ist für zeitkritische Anwendungen geeignet, bei denen man nicht warten kann, bis 
 ein kompletter Block an Daten vorhanden ist.
 
@@ -14,7 +16,7 @@ Bei beiden Varianten ist die wichtigste Voraussetzung, den verwendeten Schlüsse
 
 \section{Blockchipher}
 
-\begin{definition}[Blockcipher]
+\begin{definition}[Blockcipher]\index{Blockchipher}
 Ein Blockcipher mit einer Blocklänge von $n$ Bit ist eine invertierbare, üblicherweise deterministische Abbildung.
 
 Sei $V_n = \{0, 1\}^n$ die Menge aller $n$ Bit Vektoren und $\mathcal{K} = \{0, 1\}^k$ die Menge aller $k$ Bit Vektoren, dann sind
@@ -42,7 +44,7 @@ Die Auswahlkriterien für Blockcipher sind:
     \item Fehlerfortpflanzung: Ein fehlerhafter Ciphertext hat Auswirkungen auf Klartext, die konkrete Auswirkung unterscheidet sich je nach Betriebsmodus und Cipher.
 \end{itemize}
 
-\subsection{ECB (Electronic Codebook Mode)}
+\subsection{ECB (Electronic Codebook Mode)}\index{Blockcipher Modi!ECB}\index{ECB}
 
 Die Verschlüsselung von Plaintext Block $p_i$ ist
 
@@ -68,7 +70,7 @@ Die Nachteile sind:
 \end{itemize}
 
 
-\subsection{CBC (Cipher Block Chaining)}
+\subsection{CBC (Cipher Block Chaining)}\index{Blockcipher Modi!CBC}\index{CBC}
 
 Die Verschlüsselung von Plaintext Block $p_i$ ist
 
@@ -94,7 +96,7 @@ Die Nachteile sind:
     \item Einfügen beliebiger Blöcke am Ende bzw. gezielte Manipulation von Block $p_{i+1}$ möglich
 \end{itemize}
 
-\subsection{PCBC (Propagating Cipher Block Chaining)}
+\subsection{PCBC (Propagating Cipher Block Chaining)}\index{Blockcipher Modi!PCBC}\index{PCBC}
 
 Die Verschlüsselung von Plaintext Block $p_i$ ist
 
@@ -145,7 +147,7 @@ $C'= (IV, C_1, C_\mathbf{3}, C_\mathbf{2}, C_4, C_5)$. Wir entschlüsseln:
 Das heißt, aus dem Cipher $C' = (IV, C_1, C_3, C_2, C_4, C_5)$ ist der Plaintext 
 $P' = (P_1, P_3 \oplus C_2 \oplus P_2 \oplus P_1 \oplus C_1,  P_3 \oplus C_2 \oplus C_3, P_4, P_5)$ entstanden und nur die vertauschten Blöcke sind fehlerhaft.
 
-\subsection{XTS (oder XEX-TCB-CTS)}
+\subsection{XTS (oder XEX-TCB-CTS)}\index{Blockcipher Modi!XTS}\index{XTS}\index{XEX-TCB-CTS}
 
 Für das Xor-Encrypt-Xor-based Tweaked CodeBook Mode with CipherText Stealing brauchen wir einen geteilten Schlüssel $K = K_1 || K_2$, ein Tweak $i$ mit einem dazugehörigen 
 $j$ (z.B. ist $i$ die Blocknummer auf der Harddisk unf $j$ der entsprechende Sektor) und ein $\alpha$, das ein primitives Element in $GF(2^{128})$ ist. 
@@ -176,7 +178,7 @@ Die Nachteile sind
     \item Kein Authentication Tag
 \end{itemize}
 
-\subsection{Exkurs: CTS (Cipher Text Stealing)}
+\subsection{Exkurs: CTS (Cipher Text Stealing)}\index{CTS}\index{Cipher Text Stealing}
 
 Grundproblem: wenn der letzte Klartextblock kleiner ist als die Blockgröße, muss dieser aufgefüllt werden. Damit wird aber der Ciphertext größer als der Klartext. \\
 
@@ -196,7 +198,7 @@ Lösung: Sei $b$ die Blockgröße und $P = (P_1, \ldots, P_n)$ der Klartext.
     \caption{Yaronf, \href{https://creativecommons.org/licenses/by-sa/4.0}{CC BY-SA 4.0}, via Wikimedia Commons}
 \end{figure}
 
-\subsection{Auswahl des Blockcipher Modus}
+\subsection{Auswahl des Blockcipher Modus}\index{Blockcipher Modi}
 
 Folgende Empfehlungen gibt es für die Auswahl der Blockcipher Modi:
 
@@ -214,7 +216,7 @@ Folgende Empfehlungen gibt es für die Auswahl der Blockcipher Modi:
 
 Andere Modi sind, wenn möglich, zu vermeiden.
 
-\subsection{DES (Data Encryption Standard)}
+\subsection{DES (Data Encryption Standard)}\index{DES}
 
 Das NBS, der Vorläufer des heutigen NIST, beschloss 1972 einen standardisierten Verschlüsselungsalgorithmus zu entwickeln. Die Anforderungen daran waren:
 
@@ -251,9 +253,9 @@ Bis 1994 nur Hardware zertifiziert, keine Software. Ab 1983 wurde der Standard a
 
 DES ist ein symmetrischer Blockcipher mit Blockgröße 64 Bit. Die Schlüsselgröße ist 64 Bit, aber effektiv nur 56, da jedes 8.Bit ein Prüfbit ist. \\
 
-Die Grundprinzipien ist Konfusion und Diffusion: Konfusion \index{Konfusion} heißt, die Beziehung zwischen Klartext, Schlüssel und Ciphertext soll so komplex wie möglich 
+Die Grundprinzipien ist Konfusion und Diffusion: Konfusion \index{Konfusion}\index{Blockcipher!Konfusion} heißt, die Beziehung zwischen Klartext, Schlüssel und Ciphertext soll so komplex wie möglich 
 sein.
-Diffusion \index{Diffusion} heißt, der Ciphertext hängt von so vielen Klartext Bits ab wie nur möglich.
+Diffusion \index{Diffusion}\index{Blockcipher!Diffusion} heißt, der Ciphertext hängt von so vielen Klartext Bits ab wie nur möglich.
 
 DES wird mittels Permutationen und Substitutionen realisiert, die 16 Mal (als ``Runden'') wiederholt werden. Diese Struktur eignet sich sehr gut für 
 Hardwareimplementierungen.
@@ -1073,14 +1075,15 @@ Die momentan besten Angriffe sind:
 \end{itemize}
 
 
-\section{Streamchipher}
+\section{Streamchipher}\index{Streamchipher}
 
 Im Gegensatz zu Blockciphern werden hier Daten verschlüsselt, sobald sie zur
 Verfügung stehen. Das wird überall dort gebraucht, wo Latenzen ein Problem bereiten.\\ 
 
 \noindent Streamciphers sind üblicherweise sehr effizient in Hardware implementierbar. \\
 
-\noindent Datenstrom wird mit einem Schlüsselstrom verknüpft (üblicherweise per xor)m dafür muss der Schlüsselstrom gleich lang sein wie die Daten.
+\noindent Datenstrom wird mit einem Schlüsselstrom\index{Schlüsselstrom}\index{Keystream} verknüpft (üblicherweise per xor)m dafür muss der Schlüsselstrom gleich lang 
+sein wie die Daten.
 Im Idealfall ist der Schlüsselstrom eine komplette Zufallsfolge (siehe One-Time Pad). \\
 
 \noindent Bei Streamciphern sind Konfusion und Diffusion nicht möglich. Das heißt die Sicherheit liegt allein in der Qualität des Schlüsselstroms. \\
@@ -1092,9 +1095,9 @@ eSTREAM Projekt der EU. \\
 \noindent Durch geeigneten Betriebsmodus kann beliebiger Blockcipher zu Streamcipher umgebaut werden. Damit sind grundsätzlich alle positiven, untersuchten Eigenschaften des
 Blockciphers auf den erzeugten Schlüsselstrom übertragbar.
 
-\subsection{Streamchipher Modi}
+\subsection{Streamchipher Modi}\index{Streamcipher Modi}
 
-\paragraph{CFB (Cipher Feedback Mode)}
+\paragraph{CFB (Cipher Feedback Mode)}\index{Streamcipher Modi!CFB}\index{CFB}
 
 \begin{align*}
     c_i = p_i \oplus E_K(c_{i-1}) \\
@@ -1103,7 +1106,8 @@ Blockciphers auf den erzeugten Schlüsselstrom übertragbar.
 
 Vorteile: 
 \begin{itemize}
-    \item selbstsynchronisierend (self-synchronizing): wenn $n$ Bit gleichzeitig verschlüsselt werden, hängt der Keystream nur von den letzten $n$ Bit ab
+    \item selbstsynchronisierend (self-synchronizing): wenn $n$ Bit gleichzeitig verschlüsselt werden, hängt der Keystream\index{Schlüsselstrom!CFB}\index{Keystream!CFB} 
+    nur von den letzten $n$ Bit ab
 \end{itemize}
 
 Nachteile: 
@@ -1114,11 +1118,11 @@ fehlerhaften folgenden $(i+1)$-ten Block
 mehr entschlüsseln, je nach Applikation kann das dem Angreifer aber genügen. 
     \item Der letzte Block lässt sich völlig unbemerkt manipulieren
     \item Wie im CBC Mode wird ein IV benötigt, dieser muss aber einzigartig sein, ansonsten
-entstehen gleiche Keystreams
+entstehen gleiche Keystreams\index{Schlüsselstrom!CFB}\index{Keystream!CFB}
 \end{itemize}
 
 
-\paragraph{OFB (Output Feedback Mode)}
+\paragraph{OFB (Output Feedback Mode)}\index{Streamcipher Modi!OFB}\index{OFB}
 
 Sei $s_i = E_K(s_{i-1})$, dann
 
@@ -1129,30 +1133,34 @@ Sei $s_i = E_K(s_{i-1})$, dann
 
 Vorteile: 
 \begin{itemize}
-    \item $s_i$ ist unabhängig von Klar- und Ciphertext, d.h. Schlüsselstrom beliebiger Länge kann offline vorberechnet werden (synchronous)
+    \item $s_i$ ist unabhängig von Klar- und Ciphertext, d.h. Schlüsselstrom\index{Schlüsselstrom!OFB}\index{Keystream!OFB} beliebiger Länge kann offline vorberechnet 
+    werden (synchronous)
     \item 1 Bit Fehler im Ciphertext bewirkt nur 1 Bit Fehler im Klartext, keine Fehlerfortpflanzung
 \end{itemize}
 
 
 Nachteile: 
 \begin{itemize}
-    \item Synchronisation wichtig; sobald beide Schlüsselströme nicht mehr synchron laufen, keine Entschlüsselung mehr möglich
+    \item Synchronisation wichtig; sobald beide Schlüsselströme\index{Schlüsselstrom!OFB}\index{Keystream!OFB} nicht mehr synchron laufen, keine Entschlüsselung mehr 
+    möglich
     \item Insertion Attack möglich
 \end{itemize}
 
 \subparagraph{Insertion Attack}
 \begin{enumerate}
     \item Angenommen, Angreifer kennt Ciphertextstream $c = (c_1, c_2, c_3, \ldots)$ 
-    \item Es gilt, $c$ entstand durch xor von Klartextstream $p$ und Schlüsselstream $k$ ($c_1 = p_1 \oplus k_1, \ldots$)
+    \item Es gilt, $c$ entstand durch xor von Klartextstream $p$ und Schlüsselstream\index{Schlüsselstrom!Insertion Attack}\index{Keystream!Insertion Attack} 
+    $k$ ($c_1 = p_1 \oplus k_1, \ldots$)
     \item Angreifer fügt Bit $p_1'$ in $p$ ein (z.B. nach $p_1$) und schneidet neuen Cipherstream mit
-    \item Wenn derselbe Keystream verwendet wurde, dann gilt:
+    \item Wenn derselbe Keystream\index{Schlüsselstrom!Insertion Attack}\index{Keystream!Insertion Attack} verwendet wurde, dann gilt:
     \begin{itemize}
         \item $c_1 = p_1 \oplus k_1$
         \item $c_2' = p_1' \oplus k_2$ 
         \item $c_3' = p_2 \oplus k_3$
         \item \ldots
     \end{itemize}
-    \item Da Angreifer $p_1'$ kennt, kann er alle darauffolgenden Bits und in Folge den kompletten Keystream entschlüsseln:
+    \item Da Angreifer $p_1'$ kennt, kann er alle darauffolgenden Bits und in Folge den kompletten Keystream\index{Schlüsselstrom!Insertion Attack}
+    \index{Keystream!Insertion Attack} entschlüsseln:
     \begin{itemize}
         \item $k_2 = c_2' \oplus p_1'$
         \item $p_2 = c_2 \oplus k_2$
@@ -1162,7 +1170,7 @@ Nachteile:
 
 \end{enumerate}
 
-\paragraph{CTR (Counter Mode)}
+\paragraph{CTR (Counter Mode)}\index{Streamcipher Modi!CTR}\index{CTR}
 
 Sei $s_i = E_K(\text{Nonce}||i)$, dann 
 
@@ -1185,7 +1193,7 @@ Nachteile:
     \item Nonce und Zähler dürfen nicht mehrmals verwendet werden
 \end{itemize}
 
-\paragraph{GCM (Galois Counter Mode)}
+\paragraph{GCM (Galois Counter Mode)}\index{Streamcipher Modi!GCM}\index{GCM}
 
 TODO
 
@@ -1218,19 +1226,20 @@ Nachteile:
 
 \subsection{Klassifikation}
 
-\paragraph{One-Time Pad}
+\paragraph{One-Time Pad}\index{One-Time Pad}
 
 Ein One-Time Pad ist unconditionally secure. Hierbei ist der Schlüssel genauso lang wie die Nachricht und absolut zufällig.
 
 \paragraph{Synchron}
 
-Ein Keystream wird unabhängig von der Nachricht erzeugt und hängt nur vom initialen Schlüssel und dem aktuellen internen Zustand des Ciphers ab (z.b. OFB).
+Ein Keystream\index{Schlüsselstrom!One-Time Pad}\index{Keystream!One-Time Pad} wird unabhängig von der Nachricht erzeugt und hängt nur vom initialen Schlüssel und dem 
+aktuellen internen Zustand des Ciphers ab (z.b. OFB).
 Der Sender und Empfänger müssen daher stets im selben internen Zustand sein, d.h. eine externe Synchronisation ist notwendig.
 Bei dieser Art gibt es keine Fehlerfortpflanzung.
 
 \paragraph{Asynchron (selbstsynchronisierend)}
 
-Der Keystream ist eine Funktion des Schlüssels und der letzten $n$ Ciphertext Zeichen (z.B. CFB).
+Der Keystream\index{Schlüsselstrom!One-Time Pad}\index{Keystream!One-Time Pad} ist eine Funktion des Schlüssels und der letzten $n$ Ciphertext Zeichen (z.B. CFB).
 Bei fehlenden/eingefügten Zeichen pflanzt sich der Fehler nur über $n$ Zeichen fort,
 danach synchronisiert sich der Empfänger von selbst wieder.
 
@@ -1266,7 +1275,7 @@ Inputs:
 
 \noindent Zwei Nachrichten mit demselben Key dürfen nicht den gleichen Ciphertext erzeugen. Der Counterwird pro 64-Byte-Block erhöht. \\
 
-\noindent Output: Keystream, der aus Key, Nonce und Counter erzeugt wird und mit dem Plaintext verxort den Ciphertext stream ergibt.\\
+\noindent Output: Keystream\index{Schlüsselstrom!ChaCha20}\index{Keystream!ChaCha20}, der aus Key, Nonce und Counter erzeugt wird und mit dem Plaintext verxort den Ciphertext stream ergibt.\\
 
 Es gibt einen internen 512-Bit-State, der aus 16 ($4\times 4$) 32-Bit-Wörtern besteht:
 \begin{itemize}
