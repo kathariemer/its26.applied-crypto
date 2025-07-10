@@ -150,7 +150,7 @@ $P' = (P_1, P_3 \oplus C_2 \oplus P_2 \oplus P_1 \oplus C_1,  P_3 \oplus C_2 \op
 \subsection{XTS (oder XEX-TCB-CTS)}\index{Blockcipher Modi!XTS}\index{XTS}\index{XEX-TCB-CTS}
 
 Für das Xor-Encrypt-Xor-based Tweaked CodeBook Mode with Cipher Text Stealing\index{Cipher Text Stealing} brauchen wir einen geteilten Schlüssel $K = K_1 || K_2$, ein Tweak $i$ mit einem dazugehörigen 
-$j$ (z.B. ist $i$ die Blocknummer auf der Harddisk unf $j$ der entsprechende Sektor) und ein $\alpha$, das ein primitives Element in $GF(2^{128})$ ist. 
+$j$ (z.B. ist $i$ die Blocknummer auf der Harddisk und $j$ der entsprechende Sektor) und ein $\alpha$, das ein primitives Element in $GF(2^{128})$ ist. 
 Es gilt für die Ver- und Entschlüsselung:
 
 \begin{align*}
@@ -167,7 +167,7 @@ Es gilt für die Ver- und Entschlüsselung:
 Die Vorteile sind 
 
 \begin{itemize}
-    \item deal für Datenverschlüsselung an Endpunkten (Festplattenverschlüsselung)
+    \item ideal für Datenverschlüsselung an Endpunkten (Festplattenverschlüsselung)
     \item Ciphertext ist gleich lang wie Klartext
 \end{itemize}
 
